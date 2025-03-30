@@ -372,6 +372,16 @@ class Lexer {
                 return [Token.True];
             } else if (literal.toLowerCase() == 'false') {
                 return [Token.False];
+            } else if (literal.toLowerCase() == 'Zero') {
+                return [Token.Zero];
+            } else if (literal.toLowerCase() == 'One') {
+                return [Token.One];
+            } else if (literal.toLowerCase() == 'PauliX') {
+                return [Token.PauliX];
+            } else if (literal.toLowerCase() == 'PauliY') {
+                return [Token.PauliY];
+            } else if (literal.toLowerCase() == 'PauliZ') {
+                return [Token.PauliZ];
             } else if (literal.toLowerCase() == 'if') {
                 return [Token.If];
             } else if (literal.toLowerCase() == 'elif') {
@@ -402,6 +412,10 @@ class Lexer {
                 return [Token.Adjoint];
             } else if (literal.toLowerCase() == 'controlled') {
                 return [Token.Controlled];
+            } else if (literal.toLowerCase() == 'adj') {
+                return [Token.Adjoint];
+            } else if (literal.toLowerCase() == 'ctl') {
+                return [Token.Controlled];
             } else if (literal.toLowerCase() == 'return') {
                 return [Token.Return];
             } else if (literal.toLowerCase() == 'fail') {
@@ -422,6 +436,64 @@ class Lexer {
                 return [Token.Within];
             } else if (literal.toLowerCase() == 'apply') {
                 return [Token.Apply];
+            } else if (literal.toLowerCase() == 'is') {
+                return [Token.Is];
+            } else if (literal.toLowerCase() == 'and') {
+                return [Token.AND];
+            } else if (literal.toLowerCase() == 'ccnot') {
+                return [Token.CCNOT];
+            } else if (literal.toLowerCase() == 'cnot') {
+                return [Token.CNOT];
+            } else if (literal.toLowerCase() == 'exp') {
+                return [Token.Ex];
+            } else if (literal.toLowerCase() == 'h') {
+                return [Token.H];
+            } else if (literal.toLowerCase() == 'i') {
+                return [Token.I];
+            } else if (literal.toLowerCase() == 'm') {
+                return [Token.M];
+            } else if (literal.toLowerCase() == 'measure') {
+                return [Token.Measure];
+            } else if (literal.toLowerCase() == 'r') {
+                return [Token.R];
+            } else if (literal.toLowerCase() == 'r1') {
+                return [Token.R1];
+            } else if (literal.toLowerCase() == 'r1frac') {
+                return [Token.R1Frac];
+            } else if (literal.toLowerCase() == 'reset') {
+                return [Token.Reset];
+            } else if (literal.toLowerCase() == 'resetall') {
+                return [Token.ResetAll];
+            } else if (literal.toLowerCase() == 'rfrac') {
+                return [Token.RFrac];
+            } else if (literal.toLowerCase() == 'rx') {
+                return [Token.Rx];
+            } else if (literal.toLowerCase() == 'rxx') {
+                return [Token.Rxx];
+            } else if (literal.toLowerCase() == 'ry') {
+                return [Token.Ry];
+            } else if (literal.toLowerCase() == 'ryy') {
+                return [Token.Ryy];
+            } else if (literal.toLowerCase() == 'rz') {
+                return [Token.Rz];
+            } else if (literal.toLowerCase() == 'rzz') {
+                return [Token.Rzz];
+            } else if (literal.toLowerCase() == 's') {
+                return [Token.S];
+            } else if (literal.toLowerCase() == 'swap') {
+                return [Token.SWAP];
+            } else if (literal.toLowerCase() == 't') {
+                return [Token.T];
+            } else if (literal.toLowerCase() == 'x') {
+                return [Token.X];
+            } else if (literal.toLowerCase() == 'y') {
+                return [Token.Y];
+            } else if (literal.toLowerCase() == 'z') {
+                return [Token.Z];
+            } else if (literal.toLowerCase() == 'applyunitary') {
+                return [Token.ApplyUnitary];
+            } else if (literal.toLowerCase() == 'message') {
+                return [Token.Message];
             }
             return [Token.Identifier, literal.toString()];
         } else if (!isNumeric(char)) {
