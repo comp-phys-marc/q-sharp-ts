@@ -1,13 +1,20 @@
+import { BadArgumentError } from "./errors";
 
 /** Base class representing a basic AST node. */
 class AstNode {}
 
 /** Base class representing an OpenQASM compatible operation. */
-class OpenQASMCompatible extends AstNode {}
+class OpenQASMCompatible extends AstNode {
+    qasmString:string;
+}
+
+/** Base class representing a scope that may be composed of OpenQASM compatible operations. */
+class PossibleCompatibleScope extends AstNode {
+    qasmString:string;
+}
 
 /** Class representing an OpenQASM compatible AND operation. */
 class AND extends OpenQASMCompatible {
-    qasmString:string;
     constructor() {
         super();
     }
@@ -15,25 +22,30 @@ class AND extends OpenQASMCompatible {
 
 /** Class representing an OpenQASM compatible CCNOT operation. */
 class CCNOT extends OpenQASMCompatible {
-    qasmString:string;
+    first_control: Qubit;
+    second_control: Qubit;
+    target: Qubit;
     constructor(first_control: Qubit, second_control: Qubit, target: Qubit) {
         super();
-        this.qasmString = `CCX ${first_control.name} ${second_control.name} ${target.name}`;
+        this.first_control = first_control;
+        this.second_control = second_control;
+        this.target = target;
     }
 }
 
 /** Class representing an OpenQASM compatible CNOT operation. */
 class CNOT extends OpenQASMCompatible {
-    qasmString:string;
+    control: Qubit;
+    target: Qubit;
     constructor(control: Qubit, target: Qubit) {
         super();
-        this.qasmString = `CX ${control.name} ${target.name}`;
+        this.control = control;
+        this.target = target;
     }
 }
 
 /** Class representing an Exp operation. */
 class Ex extends AstNode {
-    qasmString:string;
     constructor() {
         super();
     }
@@ -41,73 +53,90 @@ class Ex extends AstNode {
 
 /** Class representing an OpenQASM compatible H operation. */
 class H extends OpenQASMCompatible {
-    qasmString:string;
+    target: Qubit;
     constructor(target: Qubit) {
         super();
-        this.qasmString = `H ${target.name}`;
+        this.target = target;
     }
 }
 
 /** Class representing an OpenQASM compatible I operation. */
 class I extends OpenQASMCompatible {
-    qasmString:string;
-    constructor() {
+    target: Qubit;
+    constructor(target: Qubit) {
         super();
+        this.target = target;
     }
 }
 
 /** Class representing an OpenQASM compatible M operation. */
 class M extends OpenQASMCompatible {
-    qasmString:string;
+    target: Qubit;
     constructor(target: Qubit) {
         super();
-        this.qasmString = `M ${target.name}`;
+        this.target = target;
     }
 }
 
 /** Class representing an OpenQASM compatible Measure operation. */
 class Measure extends OpenQASMCompatible {
-    qasmString:string;
-    constructor() {
+    basis: Pauli;
+    qubits: Array<Qubit>;
+    constructor(basis: Pauli, qubits: Array<Qubit>) {
         super();
+        this.basis = basis;
+        this.qubits = qubits;
     }
 }
 
 /** Class representing an OpenQASM compatible R operation. */
 class R extends OpenQASMCompatible {
-    qasmString:string;
-    constructor() {
+    pauli_axis: Pauli;
+    rads: Double;
+    qubit: Qubit;
+    constructor(pauli_axis:Pauli, rads:Double, qubit:Qubit) {
         super();
+        this.pauli_axis = pauli_axis;
+        this.rads = rads;
+        this.qubit = qubit;
     }
 }
 
-/** Class representing an OpenQASM compatible R1 operation. */
+/** Class representing an R1 operation. */
 class R1 extends OpenQASMCompatible {
-    qasmString:string;
-    constructor() {
+    rads: Double;
+    qubit: Qubit;
+    constructor(rads: Double, qubit: Qubit) {
         super();
+        this.rads = rads;
+        this.qubit = qubit;
     }
 }
 
 /** Class representing an OpenQASM compatible R1Frac operation. */
 class R1Frac extends OpenQASMCompatible {
-    qasmString:string;
-    constructor() {
+    numerator: Int;
+    power: Int;
+    qubit: Qubit;
+    constructor(numerator: Int, power: Int, qubit: Qubit) {
         super();
+        this.numerator = numerator;
+        this.power = power;
+        this.qubit = qubit;
     }
 }
 
 /** Class representing an OpenQASM compatible Reset operation. */
 class Reset extends OpenQASMCompatible {
-    qasmString:string;
-    constructor() {
+    target: Qubit;
+    constructor(target: Qubit) {
         super();
+        this.target = target;
     }
 }
 
 /** Class representing an OpenQASM compatible ResetAll operation. */
 class ResetAll extends OpenQASMCompatible {
-    qasmString:string;
     constructor() {
         super();
     }
@@ -115,23 +144,32 @@ class ResetAll extends OpenQASMCompatible {
 
 /** Class representing an OpenQASM compatible RFrac operation. */
 class RFrac extends OpenQASMCompatible {
-    qasmString:string;
-    constructor() {
+    pauli: Pauli;
+    numerator: Int;
+    power: Int;
+    qubit: Qubit;
+    constructor(pauli: Pauli, numerator: Int, power: Int, qubit: Qubit) {
         super();
+        this.pauli = pauli;
+        this.numerator = numerator;
+        this.power = power;
+        this.qubit = qubit;
     }
 }
 
 /** Class representing an OpenQASM compatible Rx operation. */
 class Rx extends OpenQASMCompatible {
-    qasmString:string;
-    constructor() {
+    rads: Double;
+    qubit: Qubit;
+    constructor(rads: Double, qubit: Qubit) {
         super();
+        this.rads = rads;
+        this.qubit = qubit;
     }
 }
 
 /** Class representing an OpenQASM compatible Rxx operation. */
 class Rxx extends OpenQASMCompatible {
-    qasmString:string;
     constructor() {
         super();
     }
@@ -139,15 +177,17 @@ class Rxx extends OpenQASMCompatible {
 
 /** Class representing an OpenQASM compatible Ry operation. */
 class Ry extends OpenQASMCompatible {
-    qasmString:string;
-    constructor() {
+    rads: Double;
+    qubit: Qubit;
+    constructor(rads: Double, qubit: Qubit) {
         super();
+        this.rads = rads;
+        this.qubit = qubit;
     }
 }
 
 /** Class representing an OpenQASM compatible Ryy operation. */
 class Ryy extends OpenQASMCompatible {
-    qasmString:string;
     constructor() {
         super();
     }
@@ -155,15 +195,17 @@ class Ryy extends OpenQASMCompatible {
 
 /** Class representing an OpenQASM compatible Rz operation. */
 class Rz extends OpenQASMCompatible {
-    qasmString:string;
-    constructor() {
+    rads: Double;
+    qubit: Qubit;
+    constructor(rads: Double, qubit: Qubit) {
         super();
+        this.rads = rads;
+        this.qubit = qubit;
     }
 }
 
 /** Class representing an OpenQASM compatible Rzz operation. */
 class Rzz extends OpenQASMCompatible {
-    qasmString:string;
     constructor() {
         super();
     }
@@ -171,7 +213,6 @@ class Rzz extends OpenQASMCompatible {
 
 /** Class representing an OpenQASM compatible S operation. */
 class S extends OpenQASMCompatible {
-    qasmString:string;
     constructor() {
         super();
     }
@@ -179,7 +220,6 @@ class S extends OpenQASMCompatible {
 
 /** Class representing an OpenQASM compatible SWAP operation. */
 class SWAP extends OpenQASMCompatible {
-    qasmString:string;
     constructor() {
         super();
     }
@@ -187,7 +227,6 @@ class SWAP extends OpenQASMCompatible {
 
 /** Class representing an OpenQASM compatible T operation. */
 class T extends OpenQASMCompatible {
-    qasmString:string;
     constructor() {
         super();
     }
@@ -195,7 +234,6 @@ class T extends OpenQASMCompatible {
 
 /** Class representing an OpenQASM compatible X operation. */
 class X extends OpenQASMCompatible {
-    qasmString:string;
     constructor() {
         super();
     }
@@ -203,7 +241,6 @@ class X extends OpenQASMCompatible {
 
 /** Class representing an OpenQASM compatible Y operation. */
 class Y extends OpenQASMCompatible {
-    qasmString:string;
     constructor() {
         super();
     }
@@ -211,7 +248,6 @@ class Y extends OpenQASMCompatible {
 
 /** Class representing an OpenQASM compatible Z operation. */
 class Z extends OpenQASMCompatible {
-    qasmString:string;
     constructor() {
         super();
     }
@@ -219,7 +255,6 @@ class Z extends OpenQASMCompatible {
 
 /** Class representing an OpenQASM compatible ApplyUnitary operation. */
 class ApplyUnitary extends OpenQASMCompatible {
-    qasmString:string;
     constructor() {
         super();
     }
@@ -227,7 +262,6 @@ class ApplyUnitary extends OpenQASMCompatible {
 
 /** Class representing an OpenQASM compatible Meassage operation. */
 class Message extends OpenQASMCompatible {
-    qasmString:string;
     constructor() {
         super();
     }
@@ -244,8 +278,8 @@ class Id extends AstNode {
 
 /** Class representing a use statement. */
 class Use extends AstNode {
-    qubits:Tuple<Qubit>;
-    constructor(qubits:Tuple<Qubit>) {
+    qubits:Array<Qubit>;
+    constructor(qubits:Array<Qubit>) {
         super();
         this.qubits = qubits;
     }
@@ -253,8 +287,8 @@ class Use extends AstNode {
 
 /** Class representing a borrow statement. */
 class Borrow extends AstNode {
-    qubits:Tuple<Qubit>;
-    constructor(qubits:Tuple<Qubit>) {
+    qubits:Array<Qubit>;
+    constructor(qubits:Array<Qubit>) {
         super();
         this.qubits = qubits;
     }
@@ -271,48 +305,63 @@ class Import extends AstNode {
 
 /** Base class representing a basic parameter. */
 class Parameter extends AstNode {
-    name?:string;
-    constructor(name?:string) {
+    repr:string;
+    constructor(repr:string) {
         super();
-        this.name = name;
+        this.repr = repr;
     }
 }
 
 /** Class representing an array. */
-class Arr<Parameter> extends Parameter {
+class Arr extends Parameter {
     vals:Array<Parameter>;
     size:Array<Int>;
     constructor(vals:Array<Parameter>, size:Array<Int>) {
-        super();
+        let repr = '['
+        for (let param of vals) {
+            repr += `${param.repr},`
+        }
+        repr += ']';
+        super(repr);
         this.vals = vals;
         this.size = size;
     }
 }
 
 /** Class representing a tuple. */
-class Tuple<Parameter> extends Parameter {
+class Tuple extends Parameter {
     vals:Array<Parameter>;
     size:Int;
     constructor(vals:Array<Parameter>, size:Int) {
-        super();
+        let repr = '('
+        for (let param of vals) {
+            repr += `${param.repr},`
+        }
+        repr += ')';
+        super(repr);
         this.vals = vals;
         this.size = size;
     }
 }
 
 /** Class representing a struct. */
-class Struct<Parameter> extends Parameter {
+class Struct extends Parameter {
     vals:Array<Parameter>;
     names:Array<string>;
     constructor(vals:Array<Parameter>, names:Array<string>) {
-        super();
+        let repr = '{'
+        for (let i = 0; i < vals.length; i++) {
+            repr += `${names[i]}: ${vals[i].repr},`
+        }
+        repr += '}';
+        super(repr);
         this.vals = vals;
         this.names = names;
     }
 }
 
 /** Class representing a function. */
-class Function extends AstNode {
+class Function extends PossibleCompatibleScope {
     name:string;
     nodes:Array<AstNode>;
     params:Array<Parameter>;
@@ -331,7 +380,7 @@ enum Modifier {
 }
 
 /** Class representing an operation. */
-class Operation extends AstNode {
+class Operation extends PossibleCompatibleScope {
     name:string;
     nodes:Array<AstNode>;
     params:Array<Parameter>;
@@ -347,36 +396,42 @@ class Operation extends AstNode {
 
 /** Class representing a float. */
 class Double extends Parameter {
-    val:AstNode | number;
-    constructor(val:AstNode | number) {
-        super();
+    val:Expression | number;
+    constructor(val:Expression | number) {
+        if (!(val instanceof Expression)) {
+            super(val.toString());
+        } else {
+            super(val.repr);
+        }
         this.val = val;
     }
 }
 
 /** Class representing an integer. */
 class BigInt extends Parameter {
-    val:AstNode | number;
-    constructor(val:AstNode | number) {
-        super();
+    val:Expression | number;
+    constructor(val:Expression | number) {
+        if (!(val instanceof Expression)) {
+            super(val.toString());
+        } else {
+            super(val.repr);
+        }
         this.val = val;
     }
 }
 
 /** Class representing a unit. */
 class Unit extends Parameter {
-    val:AstNode | string;
-    constructor(val:AstNode | string) {
-        super();
-        this.val = val;
+    constructor() {
+        super('()');
     }
 }
 
 /** Class representing a string. */
 class Str extends Parameter {
-    val:AstNode | string;
-    constructor(val:AstNode | string) {
-        super();
+    val:string;
+    constructor(val:string) {
+        super(val);
         this.val = val;
     }
 }
@@ -393,7 +448,7 @@ class For extends AstNode {
 }
 
 /** Class representing an iterator. */
-class Repeat extends AstNode {
+class Repeat extends PossibleCompatibleScope {
     inside:Array<AstNode>;
     until:Condition;
     fixup:Array<AstNode>;
@@ -406,7 +461,7 @@ class Repeat extends AstNode {
 }
 
 /** Class representing an iterator. */
-class While extends AstNode {
+class While extends PossibleCompatibleScope {
     inside:Array<AstNode>;
     until:Condition;
     constructor(inside:Array<AstNode>, until:Condition) {
@@ -421,7 +476,7 @@ class Range extends Parameter {
     lower:number;
     upper:number;
     constructor(lower:number, upper:number) {
-        super();
+        super(`${lower}..${upper}`);
         this.lower = lower;
         this.upper = upper;
     }
@@ -431,7 +486,7 @@ class Range extends Parameter {
 class Int extends Parameter {
     val:number;
     constructor(val:number) {
-        super();
+        super(val.toString());
         this.val = val;
     }
 }
@@ -440,7 +495,7 @@ class Int extends Parameter {
 class Bool extends Parameter {
     val:boolean;
     constructor(val:boolean) {
-        super();
+        super(val.toString());
         this.val = val;
     }
 }
@@ -449,7 +504,7 @@ class Bool extends Parameter {
 class Qubit extends Parameter {
     name:string;
     constructor(name:string) {
-        super();
+        super(name);
         this.name = name;
     }
 }
@@ -458,7 +513,7 @@ class Qubit extends Parameter {
 class Result extends Parameter {
     val:boolean;
     constructor(val:boolean) {
-        super();
+        super(val.toString());
         this.val = val;
     }
 }
@@ -467,14 +522,25 @@ class Result extends Parameter {
 enum Paulis {
     PauliX,
     PauliY,
-    PauliZ
+    PauliZ,
+    PauliI
 }
 
 /** Class representing a result. */
 class Pauli extends Parameter {
     val:Paulis;
     constructor(val:Paulis) {
-        super();
+        if (val == Paulis.PauliI) {
+            super('PauliI');
+        } else if (val == Paulis.PauliX) {
+            super('PauliX');
+        } else if (val == Paulis.PauliY) {
+            super('PauliY');
+        } else if (val == Paulis.PauliZ) {
+            super('PauliZ');
+        } else {
+            throw BadArgumentError;
+        }
         this.val = val;
     }
 }
@@ -483,16 +549,7 @@ class Pauli extends Parameter {
 class Variable extends Parameter {
     name:string;
     constructor(name:string) {
-        super();
-        this.name = name;
-    }
-}
-
-/** Class representing an ancilliary. */
-class Ancilliary extends Parameter {
-    name:string;
-    constructor(name:string) {
-        super();
+        super(name);
         this.name = name;
     }
 }
@@ -511,7 +568,7 @@ class SetParam extends AstNode {
 }
 
 /** Class representing a condition. */
-class Condition extends AstNode {
+class Condition extends PossibleCompatibleScope {
     condition:Expression;
     ifClause:Array<AstNode>;
     elseClause:Array<AstNode>;
@@ -619,7 +676,7 @@ class Let extends AstNode {
 }
 
 /** Class representing a conjugation. */
-class Conjugation extends AstNode {
+class Conjugation extends PossibleCompatibleScope {
     within:Array<AstNode>;
     applies:Array<AstNode>;
     constructor(within:Array<AstNode>, applies:Array<AstNode>) {
@@ -644,7 +701,11 @@ class Mutable extends AstNode {
 class Expression extends Parameter {
     elements:Array<Parameter>;
     constructor(elements:Array<Parameter>) {
-        super();
+        let repr = '';
+        for (let elem of elements) {
+            repr += elem.repr;
+        }
+        super(repr);
         this.elements = elements;
     }
 }
@@ -702,7 +763,6 @@ export {
     Or,
     Less,
     More,
-    Ancilliary,
     And,
     Not,
     Left,
@@ -741,5 +801,35 @@ export {
     Paulis,
     Tuple,
     Modifier,
-    Is
+    Is,
+    OpenQASMCompatible,
+    PossibleCompatibleScope,
+    AND,
+    CCNOT,
+    CNOT,
+    Ex,
+    H,
+    I,
+    M,
+    Measure,
+    R,
+    R1,
+    R1Frac,
+    Reset,
+    ResetAll,
+    RFrac,
+    Rx,
+    Rxx,
+    Ry,
+    Ryy,
+    Rz,
+    Rzz,
+    S,
+    SWAP,
+    T,
+    X,
+    Y,
+    Z,
+    ApplyUnitary,
+    Message
 };

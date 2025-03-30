@@ -82,6 +82,7 @@ class Parser {
     tokens:Array<[Token, (number | String)?]>;
     libraries:Array<string>;
     symbols:Array<string>;
+    qubits:Array<Qubit>;
     variables:Array<string>;
     instances:Object;
     parameters:Array<string>;
@@ -100,6 +101,7 @@ class Parser {
         this.tokens = tokens;
         this.libraries = [];
         this.symbols = [];
+        this.qubits = [];
         this.variables = [];
         this.parameters = [];
         this.instances = {};
@@ -519,6 +521,7 @@ class Parser {
     use(tokens:Array<[Token, (number | String)?]>): Array<AstNode> {
         const qubits = new Tuple([new Qubit('name')], new Int(1));
         return [new Use(qubits)]; 
+        // TODO: append to this.qubits
     }
 
     /**

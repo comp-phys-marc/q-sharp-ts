@@ -1,5 +1,6 @@
 import Lexer from './lexer';
 import Parser from './parser';
+import Compiler from './compiler';
 import * as fs from 'fs';
 
 const q_sharp = fs.readFileSync('spec/q-sharp/sample.qs', 'utf8');
@@ -24,3 +25,8 @@ for (let i=0; i<ast.length; i++) {
     console.log(JSON.stringify(ast[i]));
     console.log('\n');
 }
+
+const compiler = new Compiler(ast, 'spec/q-sharp/', parser.qubits);
+const qasm = compiler.compile();
+
+console.log(qasm);
