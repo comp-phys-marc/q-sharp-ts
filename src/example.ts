@@ -26,7 +26,7 @@ for (let i=0; i<ast.length; i++) {
     console.log('\n');
 }
 
-const compiler = new Compiler(ast, 'spec/q-sharp/', parser.qubits);
-const qasm = compiler.compile();
+const compiler = new Compiler(ast, 'spec/q-sharp/', parser.qubits, parser.variables, parser.variableTypes);
+const [qasm, compatible, qasmAst] = compiler.compile();
 
 console.log(qasm);

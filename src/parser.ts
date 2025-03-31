@@ -29,7 +29,6 @@ import {
     Or,
     Less,
     More,
-    Ancilliary,
     And,
     Not,
     Left,
@@ -67,7 +66,8 @@ import {
     Conjugation,
     Paulis,
     Tuple,
-    Modifier
+    Modifier,
+    AstType
 } from './ast';
 import {
     BadImportError,
@@ -83,7 +83,8 @@ class Parser {
     libraries:Array<string>;
     symbols:Array<string>;
     qubits:Array<Qubit>;
-    variables:Array<string>;
+    variables:Array<Variable>;
+    variableTypes:Array<AstType>;
     instances:Object;
     parameters:Array<string>;
     prepStates:Array<string>;
@@ -103,6 +104,7 @@ class Parser {
         this.symbols = [];
         this.qubits = [];
         this.variables = [];
+        this.variableTypes = [];
         this.parameters = [];
         this.instances = {};
         this.clauseParsers = [];

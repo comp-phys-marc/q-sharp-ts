@@ -1,7 +1,11 @@
 import { BadArgumentError } from "./errors";
+import { inverseParamLookup, Token } from "./token";
 
 /** Base class representing a basic AST node. */
 class AstNode {}
+
+/** Base class representing a type. */
+class AstType extends AstNode{}
 
 /** Base class representing an OpenQASM compatible operation. */
 class OpenQASMCompatible extends AstNode {
@@ -315,8 +319,8 @@ class Parameter extends AstNode {
 /** Class representing an array. */
 class Arr extends Parameter {
     vals:Array<Parameter>;
-    size:Array<Int>;
-    constructor(vals:Array<Parameter>, size:Array<Int>) {
+    size:number;
+    constructor(vals:Array<Parameter>, size:number) {
         let repr = '['
         for (let param of vals) {
             repr += `${param.repr},`
@@ -437,12 +441,14 @@ class Str extends Parameter {
 }
 
 /** Class representing an iterator. */
-class For extends AstNode {
-    name:string;
-    vals:Array<Int | Variable>;
-    constructor(name:string, vals:Array<Int | Variable>) {
+class For extends PossibleCompatibleScope {
+    inside:Array<AstNode>;
+    variable:Variable;
+    vals:Array<Int | Variable> | Range | Variable;
+    constructor(inside:Array<AstNode>, vals:Array<Int | Variable> | Range | Variable, variable:Variable) {
         super();
-        this.name = name;
+        this.variable = variable;
+        this.inside = inside;
         this.vals = vals;
     }
 }
@@ -473,9 +479,9 @@ class While extends PossibleCompatibleScope {
 
 /** Class representing a range. */
 class Range extends Parameter {
-    lower:number;
-    upper:number;
-    constructor(lower:number, upper:number) {
+    lower:Int;
+    upper:Int;
+    constructor(lower:Int, upper:Int) {
         super(`${lower}..${upper}`);
         this.lower = lower;
         this.upper = upper;
@@ -517,6 +523,51 @@ class Result extends Parameter {
         this.val = val;
     }
 }
+
+/** Class representing a Unit type. */
+class UnitType extends AstType {}
+
+/** Class representing an Int type. */
+class IntType extends AstType {}
+
+/** Class representing a BigInt type. */
+class BigIntType extends AstType {}
+
+/** Class representing a Double type. */
+class DoubleType extends AstType {}
+
+/** Class representing a Bool type. */
+class BoolType extends AstType {}
+
+/** Class representing a String type. */
+class StringType extends AstType {}
+
+/** Class representing a Qubit type. */
+class QubitType extends AstType {}
+
+/** Class representing a Result type. */
+class ResultType extends AstType {}
+
+/** Class representing a Pauli type. */
+class PauliType extends AstType {}
+
+/** Class representing a Range type. */
+class RangeType extends AstType {}
+
+/** Class representing an Array type. */
+class ArrayType extends AstType {}
+
+/** Class representing a Tuple type. */
+class TupleType extends AstType {}
+
+/** Class representing a struct type. */
+class StructType extends AstType {}
+
+/** Class representing an Operation type. */
+class OperationType extends AstType {}
+
+/** Class representing a Function type. */
+class FunctionType extends AstType {}
 
 /** Pauli basis */
 enum Paulis {
@@ -581,85 +632,179 @@ class Condition extends PossibleCompatibleScope {
 }
 
 /** Class representing exponential. */
-class Exp extends Parameter {}
+class Exp extends Parameter {
+    constructor() {
+        super(inverseParamLookup(Token.Ex));
+    }
+}
 
 /** Class representing minus. */
-class Minus extends Parameter {}
+class Minus extends Parameter {
+    constructor() {
+        super(inverseParamLookup(Token.Minus));
+    }
+}
 
 /** Class representing a union. */
-class Or extends Parameter {}
+class Or extends Parameter {
+    constructor() {
+        super(inverseParamLookup(Token.Or));
+    }
+}
 
 /** Class representing an intersection. */
-class And extends Parameter {}
+class And extends Parameter {
+    constructor() {
+        super(inverseParamLookup(Token.And));
+    }
+}
 
 /** Class representing an inversion. */
-class Not extends Parameter {}
+class Not extends Parameter {
+    constructor() {
+        super(inverseParamLookup(Token.Not));
+    }
+}
 
 /** Class representing plus. */
-class Plus extends Parameter {}
+class Plus extends Parameter {
+    constructor() {
+        super(inverseParamLookup(Token.Plus));
+    }
+}
 
 /** Class representing times. */
-class Times extends Parameter {}
-
-/** Class representing an equality. */
-class Equals extends Parameter {}
-
-/** Class representing an inequality. */
-class NotEqual extends Parameter {}
+class Times extends Parameter {
+    constructor() {
+        super(inverseParamLookup(Token.Times));
+    }
+}
 
 /** Class representing divide. */
-class Divide extends Parameter {}
+class Divide extends Parameter {
+    constructor() {
+        super(inverseParamLookup(Token.Divide));
+    }
+}
 
 /** Class representing less than. */
-class Less extends Parameter {}
+class Less extends Parameter {
+    constructor() {
+        super(inverseParamLookup(Token.Less));
+    }
+}
 
 /** Class representing bitwise or. */
-class BitwiseOr extends Parameter {}
+class BitwiseOr extends Parameter {
+    constructor() {
+        super(inverseParamLookup(Token.BitwiseOr));
+    }
+}
 
 /** Class representing bitwise and. */
-class BitwiseAnd extends Parameter {}
+class BitwiseAnd extends Parameter {
+    constructor() {
+        super(inverseParamLookup(Token.BitwiseAnd));
+    }
+}
 
 /** Class representing bitwise not. */
-class BitwiseNot extends Parameter {}
+class BitwiseNot extends Parameter {
+    constructor() {
+        super(inverseParamLookup(Token.BitwiseNot));
+    }
+}
 
 /** Class representing bitwise xor. */
-class BitwiseXor extends Parameter {}
+class BitwiseXor extends Parameter {
+    constructor() {
+        super(inverseParamLookup(Token.BitwiseXor));
+    }
+}
 
 /** Class representing greater than. */
-class More extends Parameter {}
+class More extends Parameter {
+    constructor() {
+        super(inverseParamLookup(Token.More));
+    }
+}
 
 /** Class representing left angle bracket. */
-class Left extends Parameter {}
+class Left extends Parameter {
+    constructor() {
+        super(inverseParamLookup(Token.Left));
+    }
+}
 
 /** Class representing right angle bracket. */
-class Right extends Parameter {}
+class Right extends Parameter {
+    constructor() {
+        super(inverseParamLookup(Token.Right));
+    }
+}
 
 /** Class representing modulus. */
-class Mod extends Parameter {}
+class Mod extends Parameter {
+    constructor() {
+        super(inverseParamLookup(Token.Mod));
+    }
+}
 
 /** Class representing an unwrap. */
-class Unwrap extends Parameter {}
+class Unwrap extends Parameter {
+    constructor() {
+        super(inverseParamLookup(Token.Unwrap));
+    }
+}
 
 /** Class representing equality. */
-class Eq extends Parameter {}
+class Eq extends Parameter {
+    constructor() {
+        super(inverseParamLookup(Token.Eq));
+    }
+}
 
 /** Class representing plus equals. */
-class Peq extends Parameter {}
+class Peq extends Parameter {
+    constructor() {
+        super(inverseParamLookup(Token.Peq));
+    }
+}
 
 /** Class representing minus equals. */
-class Meq extends Parameter {}
+class Meq extends Parameter {
+    constructor() {
+        super(inverseParamLookup(Token.Meq));
+    }
+}
 
 /** Class representing not equals. */
-class Neq extends Parameter {}
+class Neq extends Parameter {
+    constructor() {
+        super(inverseParamLookup(Token.Neq));
+    }
+}
 
 /** Class representing dummy variable. */
-class Dummy extends Parameter {}
+class Dummy extends Parameter {
+    constructor() {
+        super(inverseParamLookup(Token.Dummy));
+    }
+}
 
 /** Class representing greater than or equal to. */
-class Geq extends Parameter {}
+class Geq extends Parameter {
+    constructor() {
+        super(inverseParamLookup(Token.Geq));
+    }
+}
 
 /** Class representing less than or equal to. */
-class Leq extends Parameter {}
+class Leq extends Parameter {
+    constructor() {
+        super(inverseParamLookup(Token.Leq));
+    }
+}
 
 /** Class representing an is keyword. */
 class Is extends AstNode {}
@@ -757,8 +902,6 @@ export {
     Leq,
     Neq,
     Expression,
-    Equals,
-    NotEqual,
     Qubit,
     Or,
     Less,
@@ -831,5 +974,21 @@ export {
     Y,
     Z,
     ApplyUnitary,
-    Message
+    Message,
+    UnitType,
+    IntType,
+    BigIntType,
+    DoubleType,
+    BoolType,
+    StringType,
+    QubitType,
+    ResultType,
+    PauliType,
+    RangeType,
+    ArrayType,
+    TupleType,
+    StructType,
+    OperationType,
+    FunctionType,
+    AstType
 };

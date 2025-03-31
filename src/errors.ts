@@ -7,6 +7,24 @@ class BadArgumentError extends Error {
     }
 }
 
+/** Class representing a mixed types exception. */
+class MixedTypesError extends Error {
+    constructor(message?: string) {
+        super(message);
+        Object.setPrototypeOf(this, new.target.prototype);
+        this.name = MixedTypesError.name;
+    }
+}
+
+/** Class representing an unsupported type exception. */
+class UnsupportedTypeError extends Error {
+    constructor(message?: string) {
+        super(message);
+        Object.setPrototypeOf(this, new.target.prototype);
+        this.name = UnsupportedTypeError.name;
+    }
+}
+
 /** Class representing a bad parameter exception. */
 class BadParameterError extends Error {
     constructor(message?: string) {
@@ -67,6 +85,15 @@ class UninitializedFunctionInstanceError extends Error {
         super(message);
         Object.setPrototypeOf(this, new.target.prototype);
         this.name = UninitializedFunctionInstanceError.name;
+    }
+}
+
+/** Class representing an uninitialized variable exception. */
+class UninitializedVariableError extends Error {
+    constructor(message?: string) {
+        super(message);
+        Object.setPrototypeOf(this, new.target.prototype);
+        this.name = UninitializedVariableError.name;
     }
 }
 
@@ -248,5 +275,8 @@ export {
     BadImportError,
     BadFormatError,
     BadIdentifierError,
-    UninitializedFunctionInstanceError
+    UninitializedFunctionInstanceError,
+    MixedTypesError,
+    UninitializedVariableError,
+    UnsupportedTypeError
 };

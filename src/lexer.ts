@@ -494,6 +494,36 @@ class Lexer {
                 return [Token.ApplyUnitary];
             } else if (literal.toLowerCase() == 'message') {
                 return [Token.Message];
+            } else if (literal.toLowerCase() == 'unit') {
+                return [Token.UnitType];
+            } else if (literal.toLowerCase() == 'int') {
+                return [Token.IntType];
+            } else if (literal.toLowerCase() == 'bigint') {
+                return [Token.BigIntType];
+            } else if (literal.toLowerCase() == 'double') {
+                return [Token.DoubleType];
+            } else if (literal.toLowerCase() == 'bool') {
+                return [Token.BoolType];
+            } else if (literal.toLowerCase() == 'string') {
+                return [Token.StringType];
+            } else if (literal.toLowerCase() == 'qubit') {
+                return [Token.QubitType];
+            } else if (literal.toLowerCase() == 'result') {
+                return [Token.ResultType];
+            } else if (literal.toLowerCase() == 'pauli') {
+                return [Token.PauliType];
+            } else if (literal.toLowerCase() == 'range') {
+                return [Token.RangeType];
+            } else if (literal.toLowerCase() == 'array') {
+                return [Token.ArrayType];
+            } else if (literal.toLowerCase() == 'tuple') {
+                return [Token.TupleType];
+            } else if (literal.toLowerCase() == 'struct') {
+                return [Token.StructType];
+            } else if (literal.toLowerCase() == 'operation') {
+                return [Token.OperationType];
+            } else if (literal.toLowerCase() == 'function') {
+                return [Token.FunctionType];
             }
             return [Token.Identifier, literal.toString()];
         } else if (!isNumeric(char)) {

@@ -121,7 +121,24 @@ enum Token {
     PauliX,
     PauliY,
     PauliZ,
-    Is
+    Is,
+    // begin type names
+    UnitType,
+    IntType,
+    BigIntType,
+    DoubleType,
+    BoolType,
+    StringType,
+    QubitType,
+    ResultType,
+    PauliType,
+    RangeType,
+    ArrayType,
+    TupleType,
+    StructType,
+    OperationType,
+    FunctionType
+    // end type names
 }
 
 const paramLookupMap:object = {
@@ -233,7 +250,22 @@ const lookupMap:object = {
     ';': Token.Semi,
     '{': Token.Lcurlbrac,
     '}': Token.Rcurlbrac,
-    '//': Token.Comment
+    '//': Token.Comment,
+    'Unit': Token.UnitType,
+    'Int': Token.IntType,
+    'BigInt': Token.BigIntType,
+    'Double': Token.DoubleType,
+    'Bool': Token.BoolType,
+    'String': Token.StringType,
+    'Qubit': Token.QubitType,
+    'Result': Token.ResultType,
+    'Pauli': Token.PauliType,
+    'Range': Token.RangeType,
+    'Array': Token.ArrayType,
+    'Tuple': Token.TupleType,
+    'struct': Token.StructType,
+    'Operation': Token.OperationType,
+    'Function': Token.FunctionType
 }
 
 /**
