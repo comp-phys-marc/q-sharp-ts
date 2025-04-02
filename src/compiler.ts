@@ -13,7 +13,6 @@ import {
     Qubit,
     CCNOT,
     CNOT,
-    Ex,
     H,
     I,
     M,
@@ -36,9 +35,6 @@ import {
     X,
     Y,
     Z,
-    ApplyUnitary,
-    Message,
-    Int,
     Variable,
     Arr,
     Tuple,
@@ -49,7 +45,7 @@ import {
     DoubleType,
     BoolType,
     QubitType,
-    Expression
+    Use
 } from './ast';
 import {
     BadArgumentError,
@@ -84,14 +80,24 @@ class Compiler {
 
     compileExpr = (expr: string) => {
         return expr
-            .replace('[', '{')
+            .replace('[', '{')  // arrays  TODO: does this interfere with array accesses?
             .replace(']', '}')
-            .replace('..', ':'); // TODO: finish
+            .replace('..', ':')  // ranges
+            .replace('^', '**')  // arithmetic operators
+            .replace('~~~', '~')  // bitwise operators
+            .replace('<<<', '<<')
+            .replace('>>>', '>>')
+            .replace('&&&', '&')
+            .replace('^^^', '^')
+            .replace('|||', '|')
+            .replace('and', '&&')  // logical operators
+            .replace('not', '!')
+            .replace('or', '||');
     }
 
     compileHelper = (ast: Array<AstNode>) => {
         let compatible = true;
-        let fullQasm = '';
+        let fullQasm = `OPENQASM 3;\nbit[${this.qubits.length}] c;\n`;
         for (let node of ast) {
             if (node instanceof PossibleCompatibleScope) {
                 let scopeQasm = '';
@@ -267,65 +273,65 @@ class Compiler {
             } else if (node instanceof OpenQASMCompatible) {
                 // TODO: find compatible scopes and generate corresponding qasm
                 if (node instanceof CCNOT) {
-                    node.qasmString = `CCX ${node.first_control.name} ${node.second_control.name} ${node.target.name}\n`;
+                    node.qasmString = `ccx ${node.first_control.name} ${node.second_control.name} ${node.target.name};\n`;
                 } else if (node instanceof CNOT) {
-                    node.qasmString = `CX ${node.control.name} ${node.target.name}\n`;
+                    node.qasmString = `cx ${node.control.name} ${node.target.name};\n`;
                 } else if (node instanceof H) {
-                    node.qasmString = `H ${node.target.name}\n`;
+                    node.qasmString = `h ${node.target.name};\n`;
                 } else if (node instanceof I) {
-                    node.qasmString = `I ${node.target.name}\n`;
+                    node.qasmString = `id ${node.target.name};\n`;
                 } else if (node instanceof M) {
-                    node.qasmString = `M ${node.target.name}\n`;
+                    node.qasmString = `measure ${node.target.name} -> c[${this.qubits.indexOf(node.target)}];\n`;
                 } else if (node instanceof Measure) {
                     let qasmString = '';
                     if (node.basis.val == Paulis.PauliX) {
                         for (let qubit of node.qubits) {
-                            qasmString += `H ${qubit.name}\n`;  // put each qubit in the X basis
+                            qasmString += `h ${qubit.name};\n`;  // put each qubit in the X basis
                         }
                     } else if (node.basis.val == Paulis.PauliY) {
                         for (let qubit of node.qubits) {
-                            qasmString += `SDG ${qubit.name}\n`;  // put each qubit in the Y basis
-                            qasmString += `H ${qubit.name}\n`;
+                            qasmString += `sdg ${qubit.name};\n`;  // put each qubit in the Y basis
+                            qasmString += `h ${qubit.name};\n`;
                         }
                     } else if (node.basis.val != Paulis.PauliZ) {
                         throw BadArgumentError;
                     }
                     for (let qubit of node.qubits) {
-                        qasmString += `M ${qubit.name}\n`;
+                        qasmString += `measure ${qubit.name} -> c[${this.qubits.indexOf(qubit)}];\n`;
                     }
                     node.qasmString = qasmString;
                 } else if (node instanceof R) {
                     if (node.pauli_axis.val == Paulis.PauliX) {
-                        node.qasmString = `RX(${node.rads}) ${node.qubit}\n`;
+                        node.qasmString = `rx(${node.rads}) ${node.qubit};\n`;
                     } else if (node.pauli_axis.val == Paulis.PauliY) {
-                        node.qasmString = `RY(${node.rads}) ${node.qubit}\n`;
+                        node.qasmString = `ry(${node.rads}) ${node.qubit};\n`;
                     } else if (node.pauli_axis.val == Paulis.PauliZ) {
-                        node.qasmString = `RZ(${node.rads}) ${node.qubit}\n`;
+                        node.qasmString = `rz(${node.rads}) ${node.qubit};\n`;
                     } else if (node.pauli_axis.val == Paulis.PauliI) {
-                        node.qasmString = `gphase(${-node.rads / 2.0})\n`;
+                        node.qasmString = `gphase(${-node.rads / 2.0});\n`;
                     }
                 } else if (node instanceof RFrac) {
                     let angle = ((-2.0 * Math.PI) * node.numerator.val) / (2.0^node.power.val);
                     if (node.pauli.val == Paulis.PauliX) {
-                        node.qasmString = `RX(${angle}) ${node.qubit}\n`;
+                        node.qasmString = `rx(${angle}) ${node.qubit};\n`;
                     } else if (node.pauli.val == Paulis.PauliY) {
-                        node.qasmString = `RY(${angle}) ${node.qubit}\n`;
+                        node.qasmString = `ry(${angle}) ${node.qubit};\n`;
                     } else if (node.pauli.val == Paulis.PauliZ) {
-                        node.qasmString = `RZ(${angle}) ${node.qubit}\n`;
+                        node.qasmString = `rz(${angle}) ${node.qubit};\n`;
                     } else if (node.pauli.val == Paulis.PauliI) {
-                        node.qasmString = `gphase(${-angle / 2.0})\n`;
+                        node.qasmString = `gphase(${-angle / 2.0});\n`;
                     }
                 } else if (node instanceof R1Frac) {
                     let qasmString = '';
                     let firstAngle = ((-2.0 * Math.PI) * -node.numerator.val) / (2.0^(node.power.val + 1));
-                    qasmString += `RZ(${firstAngle}) ${node.qubit}\n`;
+                    qasmString += `rz(${firstAngle}) ${node.qubit};\n`;
                     let secondAngle = ((-2.0 * Math.PI) * node.numerator.val) / (2.0^(node.power.val + 1));
-                    qasmString += `gphase(${-secondAngle / 2.0}) ${node.qubit}\n`;
+                    qasmString += `gphase(${-secondAngle / 2.0}) ${node.qubit};\n`;
                     node.qasmString = qasmString;
                 } else if (node instanceof R1) {
                     let qasmString = '';
-                    qasmString += `RZ(${node.rads}) ${node.qubit}\n`;
-                    qasmString += `gphase(${node.rads.val} / 2.0})\n`;
+                    qasmString += `rz(${node.rads}) ${node.qubit};\n`;
+                    qasmString += `gphase(${node.rads.val} / 2.0});\n`;
                     node.qasmString = qasmString;
                 } else if (node instanceof Reset) {
                     node.qasmString = `reset ${node.target}`;
@@ -336,7 +342,35 @@ class Compiler {
                     }
                     node.qasmString = qasmString;
                 } else if (node instanceof Rx) {
-
+                    node.qasmString = `rx(${node.rads}) ${node.qubit};\n`;
+                } else if (node instanceof Ry) {
+                    node.qasmString = `ry(${node.rads}) ${node.qubit};\n`;
+                } else if (node instanceof Rz) {
+                    node.qasmString = `rz(${node.rads}) ${node.qubit};\n`;
+                } else if (node instanceof Rxx) {
+                    node.qasmString = `u3(pi/2, ${node.rads}, 0) ${node.qubit0};\nh ${node.qubit1};\ncx ${node.qubit0},${node.qubit1};\nu1(-${node.rads}) ${node.qubit1};\ncx ${node.qubit0},${node.qubit1};\nh ${node.qubit1};\nu2(-pi, pi-${node.rads}) ${node.qubit0};\n`;
+                } else if (node instanceof Ryy) {
+                    node.qasmString = `cy ${node.qubit0},${node.qubit1};ry(${node.rads}) ${node.qubit0};cy ${node.qubit0},${node.qubit1};\n`
+                } else if (node instanceof Rzz) {
+                    node.qasmString = `cx ${node.qubit0},${node.qubit1};\nu1(${node.rads}) ${node.qubit1};\ncx ${node.qubit0},${node.qubit1};\n`;
+                } else if (node instanceof S) {
+                    node.qasmString = `s ${node.target};\n`;
+                } else if (node instanceof SWAP) {
+                    node.qasmString = `swap ${node.qubit0},${node.qubit1};\n`;
+                } else if (node instanceof T) {
+                    node.qasmString = `t ${node.target.name};\n`;
+                } else if (node instanceof X) {
+                    node.qasmString = `x ${node.target.name};\n`;
+                } else if (node instanceof Y) {
+                    node.qasmString = `y ${node.target.name};\n`;
+                } else if (node instanceof Z) {
+                    node.qasmString = `z ${node.target.name};\n`;
+                } else if (node instanceof Use) {
+                    if (node.qubits.length == 1) {
+                        node.qasmString = `qubit ${node.qubits[0].name}`;
+                    } else {
+                        node.qasmString = `qubit[${node.qubits.length}] ${node.name}`;
+                    }
                 }
                 fullQasm += node.qasmString;
             } else {

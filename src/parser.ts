@@ -23,8 +23,6 @@ import {
     Leq,
     Neq,
     Expression,
-    Equals,
-    NotEqual,
     Qubit,
     Or,
     Less,
@@ -73,7 +71,13 @@ import {
     BadImportError,
     BadFunctionNameError,
     BadConjugationError,
-    BadOperationNameError
+    BadOperationNameError,
+    BadIntError,
+    BadIteratorError,
+    BadLoopError,
+    BadConditionStructureError,
+    BadBindingError,
+    BadIdentifierError
 } from './errors';
 
 /** Class representing a token parser. */
@@ -214,7 +218,7 @@ class Parser {
                         } else {
                             throw UninitializedMacroInstanceError;
                         }
-                    } else if (this.symbols.includes(token[1].toString()) || this.variables.includes(token[1].toString())) {
+                    } else if (this.symbols.includes(token[1].toString()) || this.variables.includes(token[1])) {
                         return [this.parseSymbol(tokens)[0]];
                     } else if (this.isSubContext) {
                         this.parameters.push(token[1].toString());
@@ -271,9 +275,9 @@ class Parser {
             case Token.Exp:
                 return [new Exp()];
             case Token.Eq:
-                return [new Equals()];
+                return [new Eq()];
             case Token.Neq:
-                return [new NotEqual()];
+                return [new Neq()];
             case Token.Divide:
                 return [new Divide()];
             case Token.Eq:
@@ -295,7 +299,7 @@ class Parser {
             case Token.Minus:
                 return [new Minus()];
             case Token.String:
-                return [new Str(token[1])];
+                return [new Str((token[1] as any))];
             case Token.Within:
                 return this.conjugation(tokens.slice(0));
         }
@@ -314,7 +318,7 @@ class Parser {
                 let node = this.parseNode(tokens, true);
                 if (node != undefined) {
                     for (let i in node) {
-                        elements.push(node[i]);
+                        elements.push((node[i] as any));
                     }
                 }
                 if (this.matchNext(tokens, [Token.Identifier, Token.Lsqbrac])) {
@@ -393,7 +397,7 @@ class Parser {
      * @return A parsed fail statement.
      */
     fail(tokens:Array<[Token, (number | String)?]>): Array<AstNode> {
-        return [new Fail(new Str(tokens[1]))];
+        return [new Fail(new Str((tokens[1] as any)))];
     }
 
     /**
@@ -979,8 +983,8 @@ class Parser {
      * @param tokens - Tokens to parse.
      * @return An array of AST nodes representing the symbols.
      */
-    matchSymbolList(tokens:Array<[Token, (number | String)?]>): Array<Qubit | Variable | Ancilliary | GetOutput> {
-        let args:Array<Qubit | Variable | Ancilliary | GetOutput> = [];
+    matchSymbolList(tokens:Array<[Token, (number | String)?]>): Array<Qubit | Variable> {
+        let args:Array<Qubit | Variable> = [];
         let j:number = 0;
 
         while(j < tokens.length && !this.matchNext(tokens.slice(j), [Token.Newline])) {

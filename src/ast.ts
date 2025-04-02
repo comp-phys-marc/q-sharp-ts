@@ -1,5 +1,6 @@
 import { BadArgumentError } from "./errors";
 import { inverseParamLookup, Token } from "./token";
+import { Complex } from './complex';
 
 /** Base class representing a basic AST node. */
 class AstNode {}
@@ -174,8 +175,14 @@ class Rx extends OpenQASMCompatible {
 
 /** Class representing an OpenQASM compatible Rxx operation. */
 class Rxx extends OpenQASMCompatible {
-    constructor() {
+    rads: Double;
+    qubit0: Qubit;
+    qubit1: Qubit;
+    constructor(rads: Double, qubit0: Qubit, qubit1: Qubit) {
         super();
+        this.rads = rads;
+        this.qubit0 = qubit0;
+        this.qubit1 = qubit1;
     }
 }
 
@@ -192,8 +199,14 @@ class Ry extends OpenQASMCompatible {
 
 /** Class representing an OpenQASM compatible Ryy operation. */
 class Ryy extends OpenQASMCompatible {
-    constructor() {
+    rads: Double;
+    qubit0: Qubit;
+    qubit1: Qubit;
+    constructor(rads: Double, qubit0: Qubit, qubit1: Qubit) {
         super();
+        this.rads = rads;
+        this.qubit0 = qubit0;
+        this.qubit1 = qubit1;
     }
 }
 
@@ -210,62 +223,86 @@ class Rz extends OpenQASMCompatible {
 
 /** Class representing an OpenQASM compatible Rzz operation. */
 class Rzz extends OpenQASMCompatible {
-    constructor() {
+    rads: Double;
+    qubit0: Qubit;
+    qubit1: Qubit;
+    constructor(rads: Double, qubit0: Qubit, qubit1: Qubit) {
         super();
+        this.rads = rads;
+        this.qubit0 = qubit0;
+        this.qubit1 = qubit1;
     }
 }
 
 /** Class representing an OpenQASM compatible S operation. */
 class S extends OpenQASMCompatible {
-    constructor() {
+    target: Qubit;
+    constructor(target: Qubit) {
         super();
+        this.target = target;
     }
 }
 
 /** Class representing an OpenQASM compatible SWAP operation. */
 class SWAP extends OpenQASMCompatible {
-    constructor() {
+    qubit0: Qubit;
+    qubit1: Qubit;
+    constructor(qubit0: Qubit, qubit1: Qubit) {
         super();
+        this.qubit0 = qubit0;
+        this.qubit1 = qubit1;
     }
 }
 
 /** Class representing an OpenQASM compatible T operation. */
 class T extends OpenQASMCompatible {
-    constructor() {
+    target: Qubit;
+    constructor(target: Qubit) {
         super();
+        this.target = target;
     }
 }
 
 /** Class representing an OpenQASM compatible X operation. */
 class X extends OpenQASMCompatible {
-    constructor() {
+    target: Qubit;
+    constructor(target: Qubit) {
         super();
+        this.target = target;
     }
 }
 
 /** Class representing an OpenQASM compatible Y operation. */
 class Y extends OpenQASMCompatible {
-    constructor() {
+    target: Qubit;
+    constructor(target: Qubit) {
         super();
+        this.target = target;
     }
 }
 
 /** Class representing an OpenQASM compatible Z operation. */
 class Z extends OpenQASMCompatible {
-    constructor() {
+    target: Qubit;
+    constructor(target: Qubit) {
         super();
+        this.target = target;
     }
 }
 
 /** Class representing an OpenQASM compatible ApplyUnitary operation. */
-class ApplyUnitary extends OpenQASMCompatible {
-    constructor() {
+class ApplyUnitary extends AstNode {
+    unitary: Array<Array<Complex>>;
+    qubits: Array<Qubit>;
+    constructor(unitary: Array<Array<Complex>>, qubits:Array<Qubit>) {
         super();
+        this.unitary = unitary;
+        this.qubits = qubits;
     }
 }
 
 /** Class representing an OpenQASM compatible Meassage operation. */
-class Message extends OpenQASMCompatible {
+class Message extends AstNode {
     constructor() {
         super();
     }
@@ -281,10 +318,12 @@ class Id extends AstNode {
 }
 
 /** Class representing a use statement. */
-class Use extends AstNode {
+class Use extends OpenQASMCompatible {
     qubits:Array<Qubit>;
-    constructor(qubits:Array<Qubit>) {
+    name: Str;
+    constructor(name: Str, qubits:Array<Qubit>) {
         super();
+        this.name = name;
         this.qubits = qubits;
     }
 }
