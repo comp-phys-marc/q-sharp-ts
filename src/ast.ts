@@ -389,9 +389,9 @@ class Tuple extends Parameter {
 
 /** Class representing a struct. */
 class Struct extends Parameter {
-    vals:Array<Parameter>;
-    names:Array<string>;
-    constructor(vals:Array<Parameter>, names:Array<string>) {
+    vals:Array<AstNode>;
+    names:Array<Id>;
+    constructor(vals:Array<AstNode>, names:Array<Id>) {
         let repr = '{'
         for (let i = 0; i < vals.length; i++) {
             repr += `${names[i]}: ${vals[i].repr},`
@@ -645,7 +645,7 @@ class Variable extends Parameter {
 }
 
 /** Class representing a parameter assignment. */
-class SetParam extends AstNode {
+class IndexedSet extends AstNode {
     name:string;
     index:Range | Int;
     val:AstNode;
@@ -654,6 +654,28 @@ class SetParam extends AstNode {
         this.index = index;
         this.name = name;
         this.val = val;
+    }
+}
+
+/** Class representing a parameter assignment. */
+class SetParam extends AstNode {
+    instance:string;
+    val:AstNode;
+    constructor(instance:string, val:AstNode) {
+        super();
+        this.instance = instance;
+        this.val = val;
+    }
+}
+
+/** Class representing a parameter reference. */
+class GetParam extends AstNode {
+    instance:string;
+    index:Int | Range | Variable;
+    constructor(instance:string, index:Int | Range | Variable) {
+        super();
+        this.instance = instance;
+        this.index = index;
     }
 }
 
@@ -1029,5 +1051,7 @@ export {
     StructType,
     OperationType,
     FunctionType,
-    AstType
+    AstType,
+    IndexedSet,
+    GetParam
 };

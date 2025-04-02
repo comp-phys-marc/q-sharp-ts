@@ -34,6 +34,15 @@ class BadParameterError extends Error {
     }
 }
 
+/** Class representing a bad struct exception. */
+class BadStructError extends Error {
+    constructor(message?: string) {
+        super(message);
+        Object.setPrototypeOf(this, new.target.prototype);
+        this.name = BadStructError.name;
+    }
+}
+
 /** Class representing a bad Function exception. */
 class BadFunctionError extends Error {
     constructor(message?: string) {
@@ -80,11 +89,11 @@ class BadUseFunctionError extends Error {
 }
 
 /** Class representing an uninitialized Function exception. */
-class UninitializedFunctionInstanceError extends Error {
+class UninitializedInstanceError extends Error {
     constructor(message?: string) {
         super(message);
         Object.setPrototypeOf(this, new.target.prototype);
-        this.name = UninitializedFunctionInstanceError.name;
+        this.name = UninitializedInstanceError.name;
     }
 }
 
@@ -116,11 +125,11 @@ class BadArrayError extends Error {
 }
 
 /** Class representing a bad register index exception. */
-class BadRegisterIndexError extends Error {
+class BadIndexError extends Error {
     constructor(message?: string) {
         super(message);
         Object.setPrototypeOf(this, new.target.prototype);
-        this.name = BadRegisterIndexError.name;
+        this.name = BadIndexError.name;
     }
 }
 
@@ -264,7 +273,7 @@ export {
     BadArrayError,
     BadLoopError,
     BadConditionStructureError,
-    BadRegisterIndexError,
+    BadIndexError,
     BadUseFunctionError,
     UndeclaredQubitError,
     UndeclaredVariableError,
@@ -275,8 +284,9 @@ export {
     BadImportError,
     BadFormatError,
     BadIdentifierError,
-    UninitializedFunctionInstanceError,
+    UninitializedInstanceError,
     MixedTypesError,
     UninitializedVariableError,
-    UnsupportedTypeError
+    UnsupportedTypeError,
+    BadStructError
 };
