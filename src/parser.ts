@@ -82,7 +82,9 @@ import {
     BadIdentifierError,
     BadStructError,
     UninitializedInstanceError,
-    BadIndexError
+    BadIndexError,
+    BadArrayError,
+    BadUseError
 } from './errors';
 
 
@@ -212,10 +214,10 @@ class Parser {
                 return this.use(tokens.slice(1));
             case Token.Operation:
                 return this.operation(tokens.slice(1));
-            case Token.Lsqbrac:                                         // check this!
+            case Token.Lsqbrac:
                 return this.array(tokens.slice(1));
-            case Token.Lcurlbrac:
-                return this.struct(tokens.slice(1));
+            case Token.StructType:
+                return this.struct(tokens.slice(2), (tokens[1][1] as string));
             case Token.Import:
                 return this.import(tokens[1]);
             case Token.Int:
@@ -586,7 +588,7 @@ class Parser {
      * @param tokens - Tokens to parse.
      * @return A parsed struct.
      */
-    struct(tokens:Array<[Token, (number | string)?]>, name: string | null): Array<AstNode> {
+    struct(tokens:Array<[Token, (number | String)?]>, name: string | null): Array<AstNode> {
         let names: Array<Id> = [];
         let vals: Array<AstNode> = [];
         let [id, consumed] = ['', 0];
@@ -620,7 +622,22 @@ class Parser {
      * @return A parsed array.
      */
     array(tokens:Array<[Token, (number | String)?]>): Array<AstNode> {
-        return [new Arr()];
+        let vals: Array<Parameter> = [];
+        while (!(this.matchNext(tokens, [Token.Rsqbrac]))) {
+            let param = this.parseNode(tokens);
+            if (param instanceof Parameter) {
+                vals.push(param);
+            } else {
+                throw BadArrayError;
+            }
+            while (!(this.matchNext(tokens, [Token.Comma])) && !(this.matchNext(tokens, [Token.Rsqbrac]))) {
+                tokens = tokens.slice(1);
+            }
+            if (this.matchNext(tokens, [Token.Comma])) {
+                tokens = tokens.slice(1);
+            }
+        }
+        return [new Arr(vals, vals.length)];
     }
 
     /**
@@ -629,9 +646,74 @@ class Parser {
      * @return A parsed qubit usage.
      */
     use(tokens:Array<[Token, (number | String)?]>): Array<AstNode> {
-        const qubits = new Tuple([new Qubit('name')], new Int(1));
-        return [new Use(qubits)]; 
-        // TODO: append to this.qubits
+        // use qubit = Qubit(); style
+        if (this.matchNext(tokens, [Token.Identifier, Token.Eq])) {
+            const id = this.identifier(tokens, true);
+            if (id instanceof Id) {
+                const qubit = new Qubit(id.id);
+                tokens = tokens.slice(2);
+                if (this.matchNext(tokens, [Token.QubitType, Token.Lbrac, Token.Rbrac])) {
+                    this.qubits.push(qubit);
+                    return [new Use(new Str(id.id), qubit)];
+                } else {
+                    throw BadUseError;
+                }
+            } else {
+                throw BadUseError;
+            }
+        // use (aux, register) = (Qubit(), Qubit[5]); style
+        } else if (this.matchNext(tokens, [Token.Lbrac])) {
+            let names: Array<Id> = [];
+            while (!(this.matchNext(tokens, [Token.Rbrac]))) {
+                let id = this.identifier(tokens, true);
+                if (id instanceof Id) {
+                    names.push(id);
+                } else {
+                    throw BadUseError;
+                }
+                while (!(this.matchNext(tokens, [Token.Comma])) && !(this.matchNext(tokens, [Token.Rbrac]))) {
+                    tokens = tokens.slice(1);
+                }
+                if (this.matchNext(tokens, [Token.Comma])) {
+                    tokens = tokens.slice(1);
+                }
+            }
+            if (this.matchNext(tokens, [Token.Eq])) {
+                tokens = tokens.slice(1);
+            } else {
+                throw BadUseError;
+            }
+            if (this.matchNext(tokens, [Token.Lbrac])) {
+                let vals: Array<Qubit> = [];
+                while (!(this.matchNext(tokens, [Token.Rbrac]))) {
+                    // Qubit()
+                    if (this.matchNext(tokens, [Token.QubitType, Token.Lbrac, Token.Rbrac])) {
+                        vals.push(new Qubit(names[vals.length].id));
+                    // Qubit[5]
+                    } else if (this.matchNext(tokens, [Token.QubitType, Token.Lsqbrac])) {
+                        let len = new Int(Number(tokens.slice(2)[1]));
+                        let q = new Qubit(names[vals.length].id, len);
+                        vals.push(q);
+                        this.qubits.push(q);
+                    } else {
+                        throw BadUseError;
+                    }
+                    while (!(this.matchNext(tokens, [Token.Comma])) && !(this.matchNext(tokens, [Token.Rbrac]))) {
+                        tokens = tokens.slice(1);
+                    }
+                    if (this.matchNext(tokens, [Token.Comma])) {
+                        tokens = tokens.slice(1);
+                    }
+                }
+                let res:Array<Use> = [];
+                for (let i = 0; i < names.length; i++) {
+                    res.push(new Use(new Str(names[i].id), vals[i]));
+                }
+                return res;
+            } else {
+                throw BadUseError;
+            }
+        }
     }
 
     /**
@@ -640,8 +722,11 @@ class Parser {
      * @return A parsed qubit borrow.
      */
     borrow(tokens:Array<[Token, (number | String)?]>): Array<AstNode> {
-        const qubits = new Tuple([new Qubit('name')], new Int(1));
-        return [new Borrow(qubits)]; 
+        const uses = this.use(tokens);
+        return uses.map((use:Use) => {
+            return new Borrow(use.name, use.qubits);
+        });
+
     }
 
     /**
@@ -1091,7 +1176,7 @@ class Parser {
 /** Class representing a struct parser. */
 class StructParser extends Parser {
 
-    parseSymbol(tokens:Array<[Token, (number | string)?]>): [Variable, number] {
+    parseSymbol(tokens:Array<[Token, (number | String)?]>): [Variable, number] {
         let name:string;
 
         if (this.matchNext(tokens, [Token.Identifier])) {

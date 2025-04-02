@@ -34,6 +34,15 @@ class BadParameterError extends Error {
     }
 }
 
+/** Class representing a bad use exception. */
+class BadUseError extends Error {
+    constructor(message?: string) {
+        super(message);
+        Object.setPrototypeOf(this, new.target.prototype);
+        this.name = BadUseError.name;
+    }
+}
+
 /** Class representing a bad struct exception. */
 class BadStructError extends Error {
     constructor(message?: string) {
@@ -288,5 +297,6 @@ export {
     MixedTypesError,
     UninitializedVariableError,
     UnsupportedTypeError,
-    BadStructError
+    BadStructError,
+    BadUseError
 };

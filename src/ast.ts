@@ -319,9 +319,9 @@ class Id extends AstNode {
 
 /** Class representing a use statement. */
 class Use extends OpenQASMCompatible {
-    qubits:Array<Qubit>;
+    qubits:Qubit;
     name: Str;
-    constructor(name: Str, qubits:Array<Qubit>) {
+    constructor(name: Str, qubits:Qubit) {
         super();
         this.name = name;
         this.qubits = qubits;
@@ -330,9 +330,11 @@ class Use extends OpenQASMCompatible {
 
 /** Class representing a borrow statement. */
 class Borrow extends AstNode {
-    qubits:Array<Qubit>;
-    constructor(qubits:Array<Qubit>) {
+    qubits:Qubit;
+    name: Str;
+    constructor(name: Str, qubits:Qubit) {
         super();
+        this.name = name;
         this.qubits = qubits;
     }
 }
@@ -548,9 +550,15 @@ class Bool extends Parameter {
 /** Class representing a qubit. */
 class Qubit extends Parameter {
     name:string;
-    constructor(name:string) {
+    length:Int;
+    constructor(name:string, length?:Int) {
         super(name);
         this.name = name;
+        if (typeof length !== 'undefined') {
+            this.length = length;
+        } else {
+            this.length = new Int(1);
+        }
     }
 }
 
