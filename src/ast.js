@@ -7,11 +7,11 @@ class AstNode {
 class AstType extends AstNode {
 }
 /** Base class representing an OpenQASM compatible operation. */
-class OpenQASMCompatible extends AstNode {
-}
+class OpenQASMCompatible extends AstNode {}
+
 /** Base class representing a scope that may be composed of OpenQASM compatible operations. */
-class PossibleCompatibleScope extends AstNode {
-}
+class PossibleCompatibleScope extends AstNode {}
+
 /** Class representing an OpenQASM compatible AND operation. */
 class AND extends OpenQASMCompatible {
     constructor() {

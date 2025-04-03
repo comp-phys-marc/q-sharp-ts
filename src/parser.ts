@@ -115,7 +115,8 @@ import {
     BadIndexError,
     BadArrayError,
     BadUseError,
-    UninitializedVariableError
+    UninitializedVariableError,
+    BadGateApplicationError
 } from './errors.js';
 
 
@@ -383,7 +384,15 @@ class Parser {
      * @return A parsed gate application.
      */
     singleQubitGate(tokens:Array<[Token, (number | String)?]>, gateClass): Array<AstNode> {
-        // TODO
+        let qubit: Qubit | Variable | GetParam;
+        let consumed: number;
+        if (this.matchNext(tokens, [Token.Lbrac, Token.Identifier])) {
+            tokens = tokens.slice(1);
+            [qubit, consumed] = this.parseSymbol(tokens);
+        } else {
+            throw BadGateApplicationError;
+        }
+        return [new gateClass(qubit)];
     }
 
     /**
@@ -392,7 +401,21 @@ class Parser {
      * @return A parsed gate application.
      */
     twoQubitGate(tokens:Array<[Token, (number | String)?]>, gateClass): Array<AstNode> {
-        // TODO
+        let qubit: Qubit | Variable | GetParam;
+        let secondQubit:  Qubit | Variable | GetParam;
+        let consumed: number;
+        if (this.matchNext(tokens, [Token.Lbrac, Token.Identifier])) {
+            tokens = tokens.slice(1);
+            [qubit, consumed] = this.parseSymbol(tokens);
+            tokens = tokens.slice(consumed);
+            if (this.matchNext(tokens, [Token.Comma, Token.Identifier])) {
+                tokens = tokens.slice(1);
+                [secondQubit, consumed] = this.parseSymbol(tokens);
+            } else {
+                throw BadGateApplicationError;
+            }
+        }
+        return [new gateClass(qubit, secondQubit)];
     }
 
     /**
