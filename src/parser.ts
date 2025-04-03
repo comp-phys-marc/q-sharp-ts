@@ -118,6 +118,7 @@ import {
     UninitializedVariableError,
     BadGateApplicationError
 } from './errors.js';
+import { ComplexMatrix, parseComplex } from './complex.js';
 
 
 /** Class representing a token parser. */
@@ -447,7 +448,19 @@ class Parser {
      * @return A parsed unitary application.
      */
     unitary(tokens:Array<[Token, (number | String)?]>): Array<AstNode> {
-        // TODO
+        let row = [];
+        while (!(this.matchNext(tokens, [Token.Rsqbrac]))) {
+            if (!(this.matchNext(tokens, [Token.Lsqbrac]))) {
+                let complex = parseComplex(tokens[1].toString());
+                row.push(complex);
+                while (!(this.matchNext(tokens, [Token.Comma])) && !(this.matchNext(tokens, [Token.Rsqbrac]))) {
+                    tokens = tokens.slice(1);
+                }
+            } else {
+                row.push(this.unitary(tokens.slice(1)));
+            }
+        }
+        return [new ComplexMatrix(row)];
     }
 
     /**

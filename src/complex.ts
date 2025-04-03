@@ -68,9 +68,15 @@
     return new Complex(real, imaginary);
 }
 
-// TODO: complex matrices
+class ComplexMatrix {
+    rows: Array<ComplexMatrix> | Array<Complex>;
+    constructor (rows:Array<ComplexMatrix> | Array<Complex>) {
+        this.rows = rows;
+    }
+}
 
 export {
     Complex,
+    ComplexMatrix,
     parseComplex
 };
