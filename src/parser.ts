@@ -69,7 +69,35 @@ import {
     IndexedSet,
     GetParam,
     ArrayType,
-    Comment
+    Comment,
+    AND,
+    CCNOT,
+    CNOT,
+    Ex,
+    H,
+    I,
+    M,
+    Measure,
+    R,
+    R1,
+    R1Frac,
+    Reset,
+    ResetAll,
+    RFrac,
+    Rx,
+    Rxx,
+    Ry,
+    Ryy,
+    Rz,
+    Rzz,
+    S,
+    SWAP,
+    T,
+    X,
+    Y,
+    Z,
+    ApplyUnitary,
+    Message,
 } from './ast.js';
 import {
     BadImportError,
@@ -180,6 +208,62 @@ class Parser {
         const token = tokens[0];
         switch(token[0]) {
             // TODO: cases for intrinsic lib
+            case Token.AND:
+                return [new And()];
+            case Token.CCNOT:
+                return this.twoQubitGate(tokens.slice(1), CCNOT);
+            case Token.CNOT:
+                return this.twoQubitGate(tokens.slice(1), CNOT);
+            case Token.Ex:
+                return [new Ex()];
+            case Token.H:
+                return this.singleQubitGate(tokens.slice(1), H);
+            case Token.I:
+                return this.singleQubitGate(tokens.slice(1), I);
+            case Token.M:
+                return this.singleQubitGate(tokens.slice(1), M);
+            case Token.Measure:
+                return this.singleQubitGate(tokens.slice(1), M);   // check this!
+            case Token.R:
+                return this.singleRotationGate(tokens.slice(1), H);
+            case Token.R1:
+                return this.singleRotationGate(tokens.slice(1), R1);
+            case Token.R1Frac:
+                return this.singleRotationGate(tokens.slice(1), R1Frac);
+            case Token.Reset:
+                return this.singleQubitGate(tokens.slice(1), Reset);
+            case Token.ResetAll:
+                return [new ResetAll()];
+            case Token.RFrac:
+                return this.singleRotationGate(tokens.slice(1), RFrac);
+            case Token.Rx:
+                return this.singleRotationGate(tokens.slice(1), Rx);
+            case Token.Rxx:
+                return this.isingRotationGate(tokens.slice(1), Rxx);
+            case Token.Ry:
+                return this.singleRotationGate(tokens.slice(1), Ry);
+            case Token.Ryy:
+                return this.isingRotationGate(tokens.slice(1), Ryy);
+            case Token.Rz:
+                return this.singleRotationGate(tokens.slice(1), Rz);
+            case Token.Rzz:
+                return this.isingRotationGate(tokens.slice(1), Rzz);
+            case Token.S:
+                return this.singleQubitGate(tokens.slice(1), S);
+            case Token.SWAP:
+                return this.twoQubitGate(tokens.slice(1), SWAP);
+            case Token.T:
+                return this.singleQubitGate(tokens.slice(1), T);
+            case Token.X:
+                return this.singleQubitGate(tokens.slice(1), X);
+            case Token.Y:
+                return this.singleQubitGate(tokens.slice(1), Y);
+            case Token.Z:
+                return this.singleQubitGate(tokens.slice(1), Z);
+            case Token.ApplyUnitary:
+                return this.unitary(tokens.slice(1));
+            case Token.Message:
+                return [new Comment(tokens[1].toString())];
             case Token.True:
                 return [new Bool(true)];
             case Token.False:
@@ -291,6 +375,51 @@ class Parser {
             case Token.Comment:
                 return [new Comment(token[1].toString())];
         }
+    }
+
+    /**
+     * Parses a single qubit gate application.
+     * @param tokens - Tokens to parse.
+     * @return A parsed gate application.
+     */
+    singleQubitGate(tokens:Array<[Token, (number | String)?]>, gateClass): Array<AstNode> {
+        // TODO
+    }
+
+    /**
+     * Parses a two qubit gate application.
+     * @param tokens - Tokens to parse.
+     * @return A parsed gate application.
+     */
+    twoQubitGate(tokens:Array<[Token, (number | String)?]>, gateClass): Array<AstNode> {
+        // TODO
+    }
+
+    /**
+     * Parses a single qubit rotation.
+     * @param tokens - Tokens to parse.
+     * @return A parsed gate application.
+     */
+    singleRotationGate(tokens:Array<[Token, (number | String)?]>, gateClass): Array<AstNode> {
+        // TODO
+    }
+
+    /**
+     * Parses an arbitrary unitary.
+     * @param tokens - Tokens to parse.
+     * @return A parsed unitary application.
+     */
+    unitary(tokens:Array<[Token, (number | String)?]): Array<AstNode> {
+        // TODO
+    }
+
+    /**
+     * Parses an two qubit rotation.
+     * @param tokens - Tokens to parse.
+     * @return A parsed gate application.
+     */
+    isingRotationGate(tokens:Array<[Token, (number | String)?]>, gateClass): Array<AstNode> {
+        // TODO
     }
 
     /**

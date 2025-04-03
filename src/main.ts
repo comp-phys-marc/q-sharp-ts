@@ -29,7 +29,7 @@ function compileString(q_sharp:string) {
     const compiler = new Compiler(ast, '../spec/q-sharp/', parser.qubits, parser.variables, parser.variableTypes);
     const [qasm, compatible, qasmAst] = compiler.compile();
     if (!compatible) {
-        console.log('WARNING! The Q# code is not fully supported by the compiler.')
+        console.log('WARNING! The Q# code is not fully supported by the compiler.');
     }
     return qasm;
 }
