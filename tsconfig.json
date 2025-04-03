@@ -5,10 +5,11 @@
         "moduleResolution": "node",
         "baseUrl": ".",
         "lib": [
-        "dom",
-        "es2015",
-        "es2016",
-        "es2017.object"
-        ]
+            "dom",
+            "es2015",
+            "es2016",
+            "es2017.object"
+        ],
+        "sourceMap": true
     }
 }

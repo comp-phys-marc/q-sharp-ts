@@ -1,4 +1,4 @@
-import { Token, lookup } from './token';
+import { Token, lookup } from './token.js';
 
 /**
  * Returns whether a given character could be an element of a numeric value.
@@ -524,6 +524,8 @@ class Lexer {
                 return [Token.OperationType];
             } else if (literal.toLowerCase() == 'function') {
                 return [Token.FunctionType];
+            } else if (literal.toLowerCase() == 'import') {
+                return [Token.Import];
             }
             return [Token.Identifier, literal.toString()];
         } else if (!isNumeric(char)) {

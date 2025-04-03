@@ -46,14 +46,14 @@ import {
     BoolType,
     QubitType,
     Use
-} from './ast';
+} from './ast.js';
 import {
     BadArgumentError,
     MixedTypesError,
     UnsupportedTypeError,
     UninitializedVariableError,
     BadIteratorError
-} from './errors';
+} from './errors.js';
 
 /** 
  *  Class representing a compiler that compiles any fully OpenQASM compatible scopes in the given program into OpenQASM. 
@@ -124,7 +124,7 @@ class Compiler {
                     let [compiledInside, insideCompatible, insideAst] = this.compileHelper(node.inside);
                     let [compiledFixup, fixupCompatible, fixupAst] = this.compileHelper(node.fixup);
                     let compiledCompatible = insideCompatible && fixupCompatible;
-                    scopeQasm += `while (!(${node.until.condition.repr})) {\n`;
+                    scopeQasm += `while (!(${node.until.repr})) {\n`;
                     if (compiledCompatible) {
                         scopeQasm += compiledInside;
                         scopeQasm += `\n}\n`;
@@ -137,7 +137,7 @@ class Compiler {
                     }
                 } else if (node instanceof While) {
                     let [compiledWhile, compiledCompatible, ast] = this.compileHelper(node.inside);
-                    scopeQasm += `while (${node.until.condition.repr}) {\n`;
+                    scopeQasm += `while (${node.until.repr}) {\n`;
                     if (compiledCompatible) {
                         scopeQasm += compiledWhile;
                         scopeQasm += `\n}\n`;
@@ -366,7 +366,7 @@ class Compiler {
                 } else if (node instanceof Z) {
                     node.qasmString = `z ${node.target.name};\n`;
                 } else if (node instanceof Use) {
-                    if (node.qubits.length == 1) {
+                    if (node.qubits.length.val == 1) {
                         node.qasmString = `qubit ${node.qubits[0].name}`;
                     } else {
                         node.qasmString = `qubit[${node.qubits.length}] ${node.name}`;

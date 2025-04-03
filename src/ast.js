@@ -1,159 +1,117 @@
 import { BadArgumentError } from "./errors.js";
 import { inverseParamLookup, Token } from "./token.js";
-import { Complex } from './complex.js';
-
 /** Base class representing a basic AST node. */
-class AstNode {}
-
+class AstNode {
+}
 /** Base class representing a type. */
-class AstType extends AstNode{}
-
+class AstType extends AstNode {
+}
 /** Base class representing an OpenQASM compatible operation. */
 class OpenQASMCompatible extends AstNode {
-    qasmString:string;
 }
-
 /** Base class representing a scope that may be composed of OpenQASM compatible operations. */
 class PossibleCompatibleScope extends AstNode {
-    qasmString:string;
 }
-
 /** Class representing an OpenQASM compatible AND operation. */
 class AND extends OpenQASMCompatible {
     constructor() {
         super();
     }
 }
-
 /** Class representing an OpenQASM compatible CCNOT operation. */
 class CCNOT extends OpenQASMCompatible {
-    first_control: Qubit;
-    second_control: Qubit;
-    target: Qubit;
-    constructor(first_control: Qubit, second_control: Qubit, target: Qubit) {
+    constructor(first_control, second_control, target) {
         super();
         this.first_control = first_control;
         this.second_control = second_control;
         this.target = target;
     }
 }
-
 /** Class representing an OpenQASM compatible CNOT operation. */
 class CNOT extends OpenQASMCompatible {
-    control: Qubit;
-    target: Qubit;
-    constructor(control: Qubit, target: Qubit) {
+    constructor(control, target) {
         super();
         this.control = control;
         this.target = target;
     }
 }
-
 /** Class representing an Exp operation. */
 class Ex extends AstNode {
     constructor() {
         super();
     }
 }
-
 /** Class representing an OpenQASM compatible H operation. */
 class H extends OpenQASMCompatible {
-    target: Qubit;
-    constructor(target: Qubit) {
+    constructor(target) {
         super();
         this.target = target;
     }
 }
-
 /** Class representing an OpenQASM compatible I operation. */
 class I extends OpenQASMCompatible {
-    target: Qubit;
-    constructor(target: Qubit) {
+    constructor(target) {
         super();
         this.target = target;
     }
 }
-
 /** Class representing an OpenQASM compatible M operation. */
 class M extends OpenQASMCompatible {
-    target: Qubit;
-    constructor(target: Qubit) {
+    constructor(target) {
         super();
         this.target = target;
     }
 }
-
 /** Class representing an OpenQASM compatible Measure operation. */
 class Measure extends OpenQASMCompatible {
-    basis: Pauli;
-    qubits: Array<Qubit>;
-    constructor(basis: Pauli, qubits: Array<Qubit>) {
+    constructor(basis, qubits) {
         super();
         this.basis = basis;
         this.qubits = qubits;
     }
 }
-
 /** Class representing an OpenQASM compatible R operation. */
 class R extends OpenQASMCompatible {
-    pauli_axis: Pauli;
-    rads: Double;
-    qubit: Qubit;
-    constructor(pauli_axis:Pauli, rads:Double, qubit:Qubit) {
+    constructor(pauli_axis, rads, qubit) {
         super();
         this.pauli_axis = pauli_axis;
         this.rads = rads;
         this.qubit = qubit;
     }
 }
-
 /** Class representing an R1 operation. */
 class R1 extends OpenQASMCompatible {
-    rads: Double;
-    qubit: Qubit;
-    constructor(rads: Double, qubit: Qubit) {
+    constructor(rads, qubit) {
         super();
         this.rads = rads;
         this.qubit = qubit;
     }
 }
-
 /** Class representing an OpenQASM compatible R1Frac operation. */
 class R1Frac extends OpenQASMCompatible {
-    numerator: Int;
-    power: Int;
-    qubit: Qubit;
-    constructor(numerator: Int, power: Int, qubit: Qubit) {
+    constructor(numerator, power, qubit) {
         super();
         this.numerator = numerator;
         this.power = power;
         this.qubit = qubit;
     }
 }
-
 /** Class representing an OpenQASM compatible Reset operation. */
 class Reset extends OpenQASMCompatible {
-    target: Qubit;
-    constructor(target: Qubit) {
+    constructor(target) {
         super();
         this.target = target;
     }
 }
-
 /** Class representing an OpenQASM compatible ResetAll operation. */
 class ResetAll extends OpenQASMCompatible {
     constructor() {
         super();
     }
 }
-
 /** Class representing an OpenQASM compatible RFrac operation. */
 class RFrac extends OpenQASMCompatible {
-    pauli: Pauli;
-    numerator: Int;
-    power: Int;
-    qubit: Qubit;
-    constructor(pauli: Pauli, numerator: Int, power: Int, qubit: Qubit) {
+    constructor(pauli, numerator, power, qubit) {
         super();
         this.pauli = pauli;
         this.numerator = numerator;
@@ -161,210 +119,157 @@ class RFrac extends OpenQASMCompatible {
         this.qubit = qubit;
     }
 }
-
 /** Class representing an OpenQASM compatible Rx operation. */
 class Rx extends OpenQASMCompatible {
-    rads: Double;
-    qubit: Qubit;
-    constructor(rads: Double, qubit: Qubit) {
+    constructor(rads, qubit) {
         super();
         this.rads = rads;
         this.qubit = qubit;
     }
 }
-
 /** Class representing an OpenQASM compatible Rxx operation. */
 class Rxx extends OpenQASMCompatible {
-    rads: Double;
-    qubit0: Qubit;
-    qubit1: Qubit;
-    constructor(rads: Double, qubit0: Qubit, qubit1: Qubit) {
+    constructor(rads, qubit0, qubit1) {
         super();
         this.rads = rads;
         this.qubit0 = qubit0;
         this.qubit1 = qubit1;
     }
 }
-
 /** Class representing an OpenQASM compatible Ry operation. */
 class Ry extends OpenQASMCompatible {
-    rads: Double;
-    qubit: Qubit;
-    constructor(rads: Double, qubit: Qubit) {
+    constructor(rads, qubit) {
         super();
         this.rads = rads;
         this.qubit = qubit;
     }
 }
-
 /** Class representing an OpenQASM compatible Ryy operation. */
 class Ryy extends OpenQASMCompatible {
-    rads: Double;
-    qubit0: Qubit;
-    qubit1: Qubit;
-    constructor(rads: Double, qubit0: Qubit, qubit1: Qubit) {
+    constructor(rads, qubit0, qubit1) {
         super();
         this.rads = rads;
         this.qubit0 = qubit0;
         this.qubit1 = qubit1;
     }
 }
-
 /** Class representing an OpenQASM compatible Rz operation. */
 class Rz extends OpenQASMCompatible {
-    rads: Double;
-    qubit: Qubit;
-    constructor(rads: Double, qubit: Qubit) {
+    constructor(rads, qubit) {
         super();
         this.rads = rads;
         this.qubit = qubit;
     }
 }
-
 /** Class representing an OpenQASM compatible Rzz operation. */
 class Rzz extends OpenQASMCompatible {
-    rads: Double;
-    qubit0: Qubit;
-    qubit1: Qubit;
-    constructor(rads: Double, qubit0: Qubit, qubit1: Qubit) {
+    constructor(rads, qubit0, qubit1) {
         super();
         this.rads = rads;
         this.qubit0 = qubit0;
         this.qubit1 = qubit1;
     }
 }
-
 /** Class representing an OpenQASM compatible S operation. */
 class S extends OpenQASMCompatible {
-    target: Qubit;
-    constructor(target: Qubit) {
+    constructor(target) {
         super();
         this.target = target;
     }
 }
-
 /** Class representing an OpenQASM compatible SWAP operation. */
 class SWAP extends OpenQASMCompatible {
-    qubit0: Qubit;
-    qubit1: Qubit;
-    constructor(qubit0: Qubit, qubit1: Qubit) {
+    constructor(qubit0, qubit1) {
         super();
         this.qubit0 = qubit0;
         this.qubit1 = qubit1;
     }
 }
-
 /** Class representing an OpenQASM compatible T operation. */
 class T extends OpenQASMCompatible {
-    target: Qubit;
-    constructor(target: Qubit) {
+    constructor(target) {
         super();
         this.target = target;
     }
 }
-
 /** Class representing an OpenQASM compatible X operation. */
 class X extends OpenQASMCompatible {
-    target: Qubit;
-    constructor(target: Qubit) {
+    constructor(target) {
         super();
         this.target = target;
     }
 }
-
 /** Class representing an OpenQASM compatible Y operation. */
 class Y extends OpenQASMCompatible {
-    target: Qubit;
-    constructor(target: Qubit) {
+    constructor(target) {
         super();
         this.target = target;
     }
 }
-
 /** Class representing an OpenQASM compatible Z operation. */
 class Z extends OpenQASMCompatible {
-    target: Qubit;
-    constructor(target: Qubit) {
+    constructor(target) {
         super();
         this.target = target;
     }
 }
-
 /** Class representing an OpenQASM compatible ApplyUnitary operation. */
 class ApplyUnitary extends AstNode {
-    unitary: Array<Array<Complex>>;
-    qubits: Array<Qubit>;
-    constructor(unitary: Array<Array<Complex>>, qubits:Array<Qubit>) {
+    constructor(unitary, qubits) {
         super();
         this.unitary = unitary;
         this.qubits = qubits;
     }
 }
-
 /** Class representing an OpenQASM compatible Meassage operation. */
 class Message extends AstNode {
     constructor() {
         super();
     }
 }
-
 /** Class representing an identifier. */
 class Id extends AstNode {
-    id:string;
-    constructor(id:string) {
+    constructor(id) {
         super();
         this.id = id;
     }
 }
-
 /** Class representing a use statement. */
 class Use extends OpenQASMCompatible {
-    qubits:Qubit;
-    name: Str;
-    constructor(name: Str, qubits:Qubit) {
+    constructor(name, qubits) {
         super();
         this.name = name;
         this.qubits = qubits;
     }
 }
-
 /** Class representing a borrow statement. */
 class Borrow extends AstNode {
-    qubits:Qubit;
-    name: Str;
-    constructor(name: Str, qubits:Qubit) {
+    constructor(name, qubits) {
         super();
         this.name = name;
         this.qubits = qubits;
     }
 }
-
 /** Class representing an import. */
 class Import extends AstNode {
-    val:string;
-    constructor(val:string) {
+    constructor(val) {
         super();
         this.val = val;
     }
 }
-
 /** Base class representing a basic parameter. */
 class Parameter extends AstNode {
-    repr:string;
-    constructor(repr:string) {
+    constructor(repr) {
         super();
         this.repr = repr;
     }
 }
-
 /** Class representing an array. */
 class Arr extends Parameter {
-    vals:Array<Parameter>;
-    size:number;
-    constructor(vals:Array<Parameter>, size:number) {
-        let repr = '['
+    constructor(vals, size) {
+        let repr = '[';
         for (let param of vals) {
-            repr += `${param.repr},`
+            repr += `${param.repr},`;
         }
         repr += ']';
         super(repr);
@@ -372,15 +277,12 @@ class Arr extends Parameter {
         this.size = size;
     }
 }
-
 /** Class representing a tuple. */
 class Tuple extends Parameter {
-    vals:Array<Parameter>;
-    size:Int;
-    constructor(vals:Array<Parameter>, size:Int) {
-        let repr = '('
+    constructor(vals, size) {
+        let repr = '(';
         for (let param of vals) {
-            repr += `${param.repr},`
+            repr += `${param.repr},`;
         }
         repr += ')';
         super(repr);
@@ -388,15 +290,12 @@ class Tuple extends Parameter {
         this.size = size;
     }
 }
-
 /** Class representing a struct. */
 class Struct extends Parameter {
-    vals:Array<Parameter>;
-    names:Array<Id>;
-    constructor(vals:Array<Parameter>, names:Array<Id>) {
-        let repr = '{'
+    constructor(vals, names) {
+        let repr = '{';
         for (let i = 0; i < vals.length; i++) {
-            repr += `${names[i]}: ${vals[i].repr},`
+            repr += `${names[i]}: ${vals[i].repr},`;
         }
         repr += '}';
         super(repr);
@@ -404,33 +303,24 @@ class Struct extends Parameter {
         this.names = names;
     }
 }
-
 /** Class representing a function. */
 class Function extends PossibleCompatibleScope {
-    name:string;
-    nodes:Array<AstNode>;
-    params:Array<Parameter>;
-    constructor(name:string, nodes:Array<AstNode>, params:Array<Parameter>) {
+    constructor(name, nodes, params) {
         super();
         this.name = name;
         this.nodes = nodes;
         this.params = params;
     }
 }
-
 /** Operation modifiers. */
-enum Modifier {
-    Adjoint,
-    Controlled
-}
-
+var Modifier;
+(function (Modifier) {
+    Modifier[Modifier["Adjoint"] = 0] = "Adjoint";
+    Modifier[Modifier["Controlled"] = 1] = "Controlled";
+})(Modifier || (Modifier = {}));
 /** Class representing an operation. */
 class Operation extends PossibleCompatibleScope {
-    name:string;
-    nodes:Array<AstNode>;
-    params:Array<Parameter>;
-    modifiers:Array<Modifier>;
-    constructor(name:string, nodes:Array<AstNode>, params:Array<Parameter>, modifiers:Array<Modifier>) {
+    constructor(name, nodes, params, modifiers) {
         super();
         this.name = name;
         this.nodes = nodes;
@@ -438,492 +328,413 @@ class Operation extends PossibleCompatibleScope {
         this.modifiers = modifiers;
     }
 }
-
 /** Class representing a float. */
 class Double extends Parameter {
-    val:Expression | number;
-    constructor(val:Expression | number) {
+    constructor(val) {
         if (!(val instanceof Expression)) {
             super(val.toString());
-        } else {
+        }
+        else {
             super(val.repr);
         }
         this.val = val;
     }
 }
-
 /** Class representing an integer. */
 class BigInt extends Parameter {
-    val:Expression | number;
-    constructor(val:Expression | number) {
+    constructor(val) {
         if (!(val instanceof Expression)) {
             super(val.toString());
-        } else {
+        }
+        else {
             super(val.repr);
         }
         this.val = val;
     }
 }
-
 /** Class representing a unit. */
 class Unit extends Parameter {
     constructor() {
         super('()');
     }
 }
-
 /** Class representing a string. */
 class Str extends Parameter {
-    val:string;
-    constructor(val:string) {
+    constructor(val) {
         super(val);
         this.val = val;
     }
 }
-
 /** Class representing a comment. */
 class Comment extends AstNode {
-    val:string;
-    constructor(val:string) {
+    constructor(val) {
         super();
         this.val = val;
     }
 }
-
 /** Class representing an iterator. */
 class For extends PossibleCompatibleScope {
-    inside:Array<AstNode>;
-    variable:Variable;
-    vals:Array<Int | Variable> | Range | Variable;
-    constructor(inside:Array<AstNode>, vals:Array<Int | Variable> | Range | Variable, variable:Variable) {
+    constructor(inside, vals, variable) {
         super();
         this.variable = variable;
         this.inside = inside;
         this.vals = vals;
     }
 }
-
 /** Class representing an iterator. */
 class Repeat extends PossibleCompatibleScope {
-    inside:Array<AstNode>;
-    until:Expression;
-    fixup:Array<AstNode>;
-    constructor(inside:Array<AstNode>, until:Expression, fixup:Array<AstNode>) {
+    constructor(inside, until, fixup) {
         super();
         this.inside = inside;
         this.until = until;
         this.fixup = fixup;
     }
 }
-
 /** Class representing an iterator. */
 class While extends PossibleCompatibleScope {
-    inside:Array<AstNode>;
-    until:Expression;
-    constructor(inside:Array<AstNode>, until:Expression) {
+    constructor(inside, until) {
         super();
         this.inside = inside;
         this.until = until;
     }
 }
-
 /** Class representing a range. */
 class Range extends Parameter {
-    lower:Int;
-    upper:Int;
-    constructor(lower:Int, upper:Int) {
+    constructor(lower, upper) {
         super(`${lower}..${upper}`);
         this.lower = lower;
         this.upper = upper;
     }
 }
-
 /** Class representing an integer. */
 class Int extends Parameter {
-    val:number;
-    constructor(val:number) {
+    constructor(val) {
         super(val.toString());
         this.val = val;
     }
 }
-
 /** Class representing a boolean. */
 class Bool extends Parameter {
-    val:boolean;
-    constructor(val:boolean) {
+    constructor(val) {
         super(val.toString());
         this.val = val;
     }
 }
-
 /** Class representing a qubit. */
 class Qubit extends Parameter {
-    name:string;
-    length:Int;
-    constructor(name:string, length?:Int) {
+    constructor(name, length) {
         super(name);
         this.name = name;
         if (typeof length !== 'undefined') {
             this.length = length;
-        } else {
+        }
+        else {
             this.length = new Int(1);
         }
     }
 }
-
 /** Class representing a result. */
 class Result extends Parameter {
-    val:boolean;
-    constructor(val:boolean) {
+    constructor(val) {
         super(val.toString());
         this.val = val;
     }
 }
-
 /** Class representing a Unit type. */
-class UnitType extends AstType {}
-
-/** Class representing an Int type. */
-class IntType extends AstType {}
-
-/** Class representing a BigInt type. */
-class BigIntType extends AstType {}
-
-/** Class representing a Double type. */
-class DoubleType extends AstType {}
-
-/** Class representing a Bool type. */
-class BoolType extends AstType {}
-
-/** Class representing a String type. */
-class StringType extends AstType {}
-
-/** Class representing a Qubit type. */
-class QubitType extends AstType {}
-
-/** Class representing a Result type. */
-class ResultType extends AstType {}
-
-/** Class representing a Pauli type. */
-class PauliType extends AstType {}
-
-/** Class representing a Range type. */
-class RangeType extends AstType {}
-
-/** Class representing an Array type. */
-class ArrayType extends AstType {}
-
-/** Class representing a Tuple type. */
-class TupleType extends AstType {}
-
-/** Class representing a struct type. */
-class StructType extends AstType {}
-
-/** Class representing an Operation type. */
-class OperationType extends AstType {}
-
-/** Class representing a Function type. */
-class FunctionType extends AstType {}
-
-/** Pauli basis */
-enum Paulis {
-    PauliX,
-    PauliY,
-    PauliZ,
-    PauliI
+class UnitType extends AstType {
 }
-
+/** Class representing an Int type. */
+class IntType extends AstType {
+}
+/** Class representing a BigInt type. */
+class BigIntType extends AstType {
+}
+/** Class representing a Double type. */
+class DoubleType extends AstType {
+}
+/** Class representing a Bool type. */
+class BoolType extends AstType {
+}
+/** Class representing a String type. */
+class StringType extends AstType {
+}
+/** Class representing a Qubit type. */
+class QubitType extends AstType {
+}
+/** Class representing a Result type. */
+class ResultType extends AstType {
+}
+/** Class representing a Pauli type. */
+class PauliType extends AstType {
+}
+/** Class representing a Range type. */
+class RangeType extends AstType {
+}
+/** Class representing an Array type. */
+class ArrayType extends AstType {
+}
+/** Class representing a Tuple type. */
+class TupleType extends AstType {
+}
+/** Class representing a struct type. */
+class StructType extends AstType {
+}
+/** Class representing an Operation type. */
+class OperationType extends AstType {
+}
+/** Class representing a Function type. */
+class FunctionType extends AstType {
+}
+/** Pauli basis */
+var Paulis;
+(function (Paulis) {
+    Paulis[Paulis["PauliX"] = 0] = "PauliX";
+    Paulis[Paulis["PauliY"] = 1] = "PauliY";
+    Paulis[Paulis["PauliZ"] = 2] = "PauliZ";
+    Paulis[Paulis["PauliI"] = 3] = "PauliI";
+})(Paulis || (Paulis = {}));
 /** Class representing a result. */
 class Pauli extends Parameter {
-    val:Paulis;
-    constructor(val:Paulis) {
+    constructor(val) {
         if (val == Paulis.PauliI) {
             super('PauliI');
-        } else if (val == Paulis.PauliX) {
+        }
+        else if (val == Paulis.PauliX) {
             super('PauliX');
-        } else if (val == Paulis.PauliY) {
+        }
+        else if (val == Paulis.PauliY) {
             super('PauliY');
-        } else if (val == Paulis.PauliZ) {
+        }
+        else if (val == Paulis.PauliZ) {
             super('PauliZ');
-        } else {
+        }
+        else {
             throw BadArgumentError;
         }
         this.val = val;
     }
 }
-
 /** Class representing a variable. */
 class Variable extends Parameter {
-    name:string;
-    constructor(name:string) {
+    constructor(name) {
         super(name);
         this.name = name;
     }
 }
-
 /** Class representing a parameter assignment. */
 class IndexedSet extends AstNode {
-    name:string;
-    index:Range | Int;
-    val:AstNode;
-    constructor(name:string, index:Range | Int, val:AstNode) {
+    constructor(name, index, val) {
         super();
         this.index = index;
         this.name = name;
         this.val = val;
     }
 }
-
 /** Class representing a parameter assignment. */
 class SetParam extends AstNode {
-    instance:string;
-    val:AstNode;
-    constructor(instance:string, val:AstNode) {
+    constructor(instance, val) {
         super();
         this.instance = instance;
         this.val = val;
     }
 }
-
 /** Class representing a parameter reference. */
 class GetParam extends AstNode {
-    instance:string;
-    index:Int | Range | Variable;
-    constructor(instance:string, index:Int | Range | Variable) {
+    constructor(instance, index) {
         super();
         this.instance = instance;
         this.index = index;
     }
 }
-
 /** Class representing a condition. */
 class Condition extends PossibleCompatibleScope {
-    condition:Expression;
-    ifClause:Array<AstNode>;
-    elseClause:Array<AstNode>;
-    constructor(condition:Expression, ifClause:Array<AstNode>, elseClause?:Array<AstNode>) {
+    constructor(condition, ifClause, elseClause) {
         super();
         this.condition = condition;
         this.ifClause = ifClause;
         this.elseClause = elseClause;
     }
 }
-
 /** Class representing exponential. */
 class Exp extends Parameter {
     constructor() {
         super(inverseParamLookup(Token.Ex));
     }
 }
-
 /** Class representing minus. */
 class Minus extends Parameter {
     constructor() {
         super(inverseParamLookup(Token.Minus));
     }
 }
-
 /** Class representing a union. */
 class Or extends Parameter {
     constructor() {
         super(inverseParamLookup(Token.Or));
     }
 }
-
 /** Class representing an intersection. */
 class And extends Parameter {
     constructor() {
         super(inverseParamLookup(Token.And));
     }
 }
-
 /** Class representing an inversion. */
 class Not extends Parameter {
     constructor() {
         super(inverseParamLookup(Token.Not));
     }
 }
-
 /** Class representing plus. */
 class Plus extends Parameter {
     constructor() {
         super(inverseParamLookup(Token.Plus));
     }
 }
-
 /** Class representing times. */
 class Times extends Parameter {
     constructor() {
         super(inverseParamLookup(Token.Times));
     }
 }
-
 /** Class representing divide. */
 class Divide extends Parameter {
     constructor() {
         super(inverseParamLookup(Token.Divide));
     }
 }
-
 /** Class representing less than. */
 class Less extends Parameter {
     constructor() {
         super(inverseParamLookup(Token.Less));
     }
 }
-
 /** Class representing bitwise or. */
 class BitwiseOr extends Parameter {
     constructor() {
         super(inverseParamLookup(Token.BitwiseOr));
     }
 }
-
 /** Class representing bitwise and. */
 class BitwiseAnd extends Parameter {
     constructor() {
         super(inverseParamLookup(Token.BitwiseAnd));
     }
 }
-
 /** Class representing bitwise not. */
 class BitwiseNot extends Parameter {
     constructor() {
         super(inverseParamLookup(Token.BitwiseNot));
     }
 }
-
 /** Class representing bitwise xor. */
 class BitwiseXor extends Parameter {
     constructor() {
         super(inverseParamLookup(Token.BitwiseXor));
     }
 }
-
 /** Class representing greater than. */
 class More extends Parameter {
     constructor() {
         super(inverseParamLookup(Token.More));
     }
 }
-
 /** Class representing left angle bracket. */
 class Left extends Parameter {
     constructor() {
         super(inverseParamLookup(Token.Left));
     }
 }
-
 /** Class representing right angle bracket. */
 class Right extends Parameter {
     constructor() {
         super(inverseParamLookup(Token.Right));
     }
 }
-
 /** Class representing modulus. */
 class Mod extends Parameter {
     constructor() {
         super(inverseParamLookup(Token.Mod));
     }
 }
-
 /** Class representing an unwrap. */
 class Unwrap extends Parameter {
     constructor() {
         super(inverseParamLookup(Token.Unwrap));
     }
 }
-
 /** Class representing equality. */
 class Eq extends Parameter {
     constructor() {
         super(inverseParamLookup(Token.Eq));
     }
 }
-
 /** Class representing plus equals. */
 class Peq extends Parameter {
     constructor() {
         super(inverseParamLookup(Token.Peq));
     }
 }
-
 /** Class representing minus equals. */
 class Meq extends Parameter {
     constructor() {
         super(inverseParamLookup(Token.Meq));
     }
 }
-
 /** Class representing not equals. */
 class Neq extends Parameter {
     constructor() {
         super(inverseParamLookup(Token.Neq));
     }
 }
-
 /** Class representing dummy variable. */
 class Dummy extends Parameter {
     constructor() {
         super(inverseParamLookup(Token.Dummy));
     }
 }
-
 /** Class representing greater than or equal to. */
 class Geq extends Parameter {
     constructor() {
         super(inverseParamLookup(Token.Geq));
     }
 }
-
 /** Class representing less than or equal to. */
 class Leq extends Parameter {
     constructor() {
         super(inverseParamLookup(Token.Leq));
     }
 }
-
 /** Class representing an is keyword. */
-class Is extends AstNode {}
-
+class Is extends AstNode {
+}
 /** Class representing assignment. */
 class Let extends AstNode {
-    expression:Expression;
-    variable:Variable;
-    constructor(expression:Expression, variable:Variable) {
+    constructor(expression, variable) {
         super();
         this.expression = expression;
         this.variable = variable;
     }
 }
-
 /** Class representing a conjugation. */
 class Conjugation extends PossibleCompatibleScope {
-    within:Array<AstNode>;
-    applies:Array<AstNode>;
-    constructor(within:Array<AstNode>, applies:Array<AstNode>) {
+    constructor(within, applies) {
         super();
         this.within = within;
         this.applies = applies;
     }
 }
-
 /** Class representing mutable assignment. */
 class Mutable extends AstNode {
-    expression:Expression;
-    variable:Variable;
-    constructor(expression:Expression, variable:Variable) {
+    constructor(expression, variable) {
         super();
         this.expression = expression;
         this.variable = variable;
     }
 }
-
 /** Class representing expression. */
 class Expression extends Parameter {
-    elements:Array<Parameter>;
-    constructor(elements:Array<Parameter>) {
+    constructor(elements) {
         let repr = '';
         for (let elem of elements) {
             repr += elem.repr;
@@ -932,144 +743,26 @@ class Expression extends Parameter {
         this.elements = elements;
     }
 }
-
 /** A program termination. */
 class Fail extends AstNode {
-    msg:Str;
-    constructor(msg:Str) {
+    constructor(msg) {
         super();
         this.msg = msg;
     }
 }
-
 /** A return statement. */
 class Return extends AstNode {
-    expr:Expression;
-    constructor(expr:Expression) {
+    constructor(expr) {
         super();
         this.expr = expr;
     }
 }
-
 /** Class representing assertion. */
 class Assert extends AstNode {
-    expression:Expression;
-    constructor(expression:Expression) {
+    constructor(expression) {
         super();
         this.expression = expression;
     }
 }
-
-export {
-    AstNode,
-    Assert,
-    Id,
-    Arr,
-    Int,
-    Bool,
-    Mod,
-    Parameter,
-    Condition,
-    Minus,
-    Plus,
-    Times,
-    Divide,
-    Exp,
-    Str,
-    Geq,
-    Leq,
-    Neq,
-    Expression,
-    Qubit,
-    Or,
-    Less,
-    More,
-    And,
-    Not,
-    Left,
-    Right,
-    Variable,
-    Let,
-    SetParam,
-    Range,
-    Struct,
-    Operation,
-    Function,
-    BigInt,
-    Result,
-    Double,
-    Unit,
-    Pauli,
-    Eq,
-    Peq,
-    Meq,
-    Dummy,
-    BitwiseAnd,
-    BitwiseNot,
-    BitwiseOr,
-    BitwiseXor,
-    Use,
-    Borrow,
-    Import,
-    Mutable,
-    Unwrap,
-    For,
-    While,
-    Repeat,
-    Fail,
-    Return,
-    Conjugation,
-    Paulis,
-    Tuple,
-    Modifier,
-    Is,
-    OpenQASMCompatible,
-    PossibleCompatibleScope,
-    AND,
-    CCNOT,
-    CNOT,
-    Ex,
-    H,
-    I,
-    M,
-    Measure,
-    R,
-    R1,
-    R1Frac,
-    Reset,
-    ResetAll,
-    RFrac,
-    Rx,
-    Rxx,
-    Ry,
-    Ryy,
-    Rz,
-    Rzz,
-    S,
-    SWAP,
-    T,
-    X,
-    Y,
-    Z,
-    ApplyUnitary,
-    Message,
-    UnitType,
-    IntType,
-    BigIntType,
-    DoubleType,
-    BoolType,
-    StringType,
-    QubitType,
-    ResultType,
-    PauliType,
-    RangeType,
-    ArrayType,
-    TupleType,
-    StructType,
-    OperationType,
-    FunctionType,
-    AstType,
-    IndexedSet,
-    GetParam,
-    Comment
-};
+export { AstNode, Assert, Id, Arr, Int, Bool, Mod, Parameter, Condition, Minus, Plus, Times, Divide, Exp, Str, Geq, Leq, Neq, Expression, Qubit, Or, Less, More, And, Not, Left, Right, Variable, Let, SetParam, Range, Struct, Operation, Function, BigInt, Result, Double, Unit, Pauli, Eq, Peq, Meq, Dummy, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor, Use, Borrow, Import, Mutable, Unwrap, For, While, Repeat, Fail, Return, Conjugation, Paulis, Tuple, Modifier, Is, OpenQASMCompatible, PossibleCompatibleScope, AND, CCNOT, CNOT, Ex, H, I, M, Measure, R, R1, R1Frac, Reset, ResetAll, RFrac, Rx, Rxx, Ry, Ryy, Rz, Rzz, S, SWAP, T, X, Y, Z, ApplyUnitary, Message, UnitType, IntType, BigIntType, DoubleType, BoolType, StringType, QubitType, ResultType, PauliType, RangeType, ArrayType, TupleType, StructType, OperationType, FunctionType, AstType, IndexedSet, GetParam, Comment };
+//# sourceMappingURL=ast.js.map

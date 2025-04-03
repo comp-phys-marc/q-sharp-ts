@@ -1,120 +1,15 @@
 import * as fs from 'fs';
 import Lexer from './lexer.js';
-import { 
-    Token
-} from './token.js';
-import { 
-    AstNode,
-    Assert,
-    Id,
-    Arr,
-    Int,
-    Bool,
-    Mod,
-    Parameter,
-    Condition,
-    Minus,
-    Plus,
-    Times,
-    Divide,
-    Exp,
-    Str,
-    Geq,
-    Leq,
-    Neq,
-    Expression,
-    Qubit,
-    Or,
-    Less,
-    More,
-    And,
-    Not,
-    Left,
-    Right,
-    Variable,
-    Let,
-    SetParam,
-    Range,
-    Struct,
-    Operation,
-    Function,
-    BigInt,
-    Result,
-    Double,
-    Unit,
-    Pauli,
-    Eq,
-    Peq,
-    Meq,
-    Dummy,
-    BitwiseAnd,
-    BitwiseNot,
-    BitwiseOr,
-    BitwiseXor,
-    Use,
-    Borrow,
-    Import,
-    Mutable,
-    Unwrap,
-    For,
-    While,
-    Repeat,
-    Fail,
-    Return,
-    Conjugation,
-    Paulis,
-    Tuple,
-    Modifier,
-    AstType,
-    IndexedSet,
-    GetParam,
-    ArrayType,
-    Comment
-} from './ast.js';
-import {
-    BadImportError,
-    BadFunctionNameError,
-    BadConjugationError,
-    BadOperationNameError,
-    BadIntError,
-    BadIteratorError,
-    BadLoopError,
-    BadConditionStructureError,
-    BadBindingError,
-    BadIdentifierError,
-    BadStructError,
-    UninitializedInstanceError,
-    BadIndexError,
-    BadArrayError,
-    BadUseError,
-    UninitializedVariableError
-} from './errors.js';
-
-
+import { Token } from './token.js';
+import { Assert, Id, Arr, Int, Bool, Mod, Parameter, Condition, Minus, Plus, Times, Divide, Exp, Str, Geq, Leq, Neq, Expression, Qubit, Or, Less, More, And, Not, Left, Right, Variable, Let, Range, Struct, Operation, Function, BigInt, Result, Double, Pauli, Eq, Peq, Meq, Dummy, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor, Use, Borrow, Import, Mutable, Unwrap, For, While, Repeat, Fail, Return, Conjugation, Paulis, Modifier, GetParam, ArrayType, Comment } from './ast.js';
+import { BadImportError, BadFunctionNameError, BadConjugationError, BadOperationNameError, BadIntError, BadIteratorError, BadLoopError, BadConditionStructureError, BadBindingError, BadIdentifierError, BadStructError, UninitializedInstanceError, BadIndexError, BadArrayError, BadUseError, UninitializedVariableError } from './errors.js';
 /** Class representing a token parser. */
 class Parser {
-
-    tokens:Array<[Token, (number | String)?]>;
-    libraries:Array<string>;
-    symbols:Array<string>;
-    qubits:Array<Qubit>;
-    variables:Array<Variable>;
-    variableTypes:Array<AstType>;
-    instances:Object;
-    parameters:Array<string>;
-    prepStates:Array<string>;
-    clauseParsers:Array<Parser>;
-    funcParsers:Object;
-    operationParsers:Object;
-    structParsers:Array<StructParser>;
-    isSubContext:boolean;
-    filePath:string;
-    
     /**
      * Creates a parser.
      * @param tokens - Tokens to parse.
      */
-    constructor(tokens:Array<[Token, (number | String)?]>, isSubContext:boolean=false, filePath:string='') {
+    constructor(tokens, isSubContext = false, filePath = '') {
         this.tokens = tokens;
         this.libraries = [];
         this.symbols = [];
@@ -130,37 +25,36 @@ class Parser {
         this.isSubContext = isSubContext;
         this.filePath = filePath;
     }
-
     /**
      * Calling this method parses the code represented by the provided tokens.
      * @return The abstract syntax tree.
      */
-    parse(): Array<AstNode> {
-        let ast:Array<AstNode> = [];
+    parse() {
+        let ast = [];
         let i = 0;
         while (i < (this.tokens.length - 1)) {
             let nodes = this.parseNode(this.tokens.slice(i));
-            ast = ast.concat(
-                    nodes ? nodes : []
-                );
-
+            ast = ast.concat(nodes ? nodes : []);
             // replace with various ways to declare functions
             if (this.tokens[i][0] == Token.Rcurlbrac) {
                 while (!(this.tokens[i] == undefined) && !(this.matchNext(this.tokens.slice(i), [Token.EndOfFile])) && !(this.matchNext(this.tokens.slice(i), [Token.Rcurlbrac]))) {
                     i++;
                 }
                 i++;
-            // turnary, etc. need to be here too
-            } else if (this.tokens[i][0] == Token.If) {
+                // turnary, etc. need to be here too
+            }
+            else if (this.tokens[i][0] == Token.If) {
                 while (!(this.tokens[i] == undefined) && !(this.matchNext(this.tokens.slice(i), [Token.EndOfFile])) && !(this.matchNext(this.tokens.slice(i), [Token.Else]))) {
                     i++;
                 }
-            // all the types of iterators go here
-            } else if (this.tokens[i][0] == Token.For) {
+                // all the types of iterators go here
+            }
+            else if (this.tokens[i][0] == Token.For) {
                 while (!(this.tokens[i] == undefined) && !(this.matchNext(this.tokens.slice(i), [Token.EndOfFile])) && !(this.matchNext(this.tokens.slice(i), [Token.Rcurlbrac]))) {
                     i++;
                 }
-            } else {
+            }
+            else {
                 while (!(this.tokens[i] == undefined) && !(this.matchNext(this.tokens.slice(i), [Token.EndOfFile])) && !(this.matchNext(this.tokens.slice(i), [Token.Newline]))) {
                     i++;
                 }
@@ -169,16 +63,15 @@ class Parser {
         }
         return ast;
     }
-
     /**
      * Delegates the parsing of the next set of tokens to the appropriate method.
      * @param tokens - Remaining tokens to parse.
      * @param allowVariables - Whether encountered identifiers should be consider variable initializations or references.
      * @return A set of AST nodes.
      */
-    parseNode(tokens:Array<[Token, (number | String)?]>, allowVariables:boolean=false): Array<AstNode> {
+    parseNode(tokens, allowVariables = false) {
         const token = tokens[0];
-        switch(token[0]) {
+        switch (token[0]) {
             // TODO: cases for intrinsic lib
             case Token.True:
                 return [new Bool(true)];
@@ -221,7 +114,7 @@ class Parser {
             case Token.Lsqbrac:
                 return this.array(tokens.slice(1));
             case Token.StructType:
-                return this.struct(tokens.slice(2), (tokens[1][1] as string));
+                return this.struct(tokens.slice(2), tokens[1][1]);
             case Token.Import:
                 return this.import(tokens[1]);
             case Token.Int:
@@ -285,28 +178,26 @@ class Parser {
             case Token.Minus:
                 return [new Minus()];
             case Token.String:
-                return [new Str((token[1] as any))];
+                return [new Str(token[1])];
             case Token.Within:
                 return this.conjugation(tokens.slice(0));
             case Token.Comment:
                 return [new Comment(token[1].toString())];
         }
     }
-
     /**
      * Parses a logical and mathematical expression.
      * @param tokens - Expression tokens to parse.
      * @return A parsed expression.
      */
-    parseExpression(tokens:Array<[Token, (number | String)?]>): Expression {
-        let elements:Array<Parameter> = [];
-
+    parseExpression(tokens) {
+        let elements = [];
         while (tokens.length > 0) {
             if (tokens[0][0] != Token.Lbrac) {
                 let node = this.parseNode(tokens, true);
                 if (node != undefined) {
                     for (let i in node) {
-                        elements.push((node[i] as any));
+                        elements.push(node[i]);
                     }
                 }
                 if (this.matchNext(tokens, [Token.Identifier, Token.Lsqbrac])) {
@@ -315,8 +206,9 @@ class Parser {
                     }
                 }
                 tokens = tokens.slice(1);
-            } else {
-                let exprTokens:Array<[Token, (number | String)?]> = [];
+            }
+            else {
+                let exprTokens = [];
                 let j = 1;
                 while (tokens[j] != undefined && !this.matchNext(tokens.slice(j), [Token.Newline]) && !this.matchNext(tokens.slice(j), [Token.Rbrac])) {
                     exprTokens.push(tokens[j]);
@@ -327,22 +219,18 @@ class Parser {
                 tokens = tokens.slice(exprTokens.length + 2);
             }
         }
-
         return new Expression(elements);
     }
-
     /**
      * Parses a conjugation.
      * @param tokens - Tokens to parse.
      * @return A parsed conjugation.
      */
-    conjugation(tokens:Array<[Token, (number | String)?]>): Array<AstNode> {
-        let withinTokens:Array<[Token, (number | String)?]> = [];
-        let applyTokens:Array<[Token, (number | String)?]> = [];
-
+    conjugation(tokens) {
+        let withinTokens = [];
+        let applyTokens = [];
         if (this.matchNext(tokens, [Token.Within, Token.Lcurlbrac])) {
             tokens = tokens.slice(1);
-
             let i = 0;
             while (tokens[i] != undefined && !this.matchNext(tokens.slice(i), [Token.Rcurlbrac])) {
                 withinTokens.push(tokens[i]);
@@ -350,10 +238,8 @@ class Parser {
             }
             let withinParser = this.childParser(withinTokens);
             let withinCode = withinParser.parse();
-
             if (this.matchNext(tokens, [Token.Apply, Token.Lcurlbrac])) {
                 tokens = tokens.slice(1);
-
                 let j = 0;
                 while (tokens[j] != undefined && !this.matchNext(tokens.slice(j), [Token.Rcurlbrac])) {
                     applyTokens.push(tokens[j]);
@@ -361,21 +247,19 @@ class Parser {
                 }
                 let applyParser = this.childParser(applyTokens);
                 let applyCode = applyParser.parse();
-
                 return [new Conjugation(withinCode, applyCode)];
-
-            } else {
+            }
+            else {
                 throw BadConjugationError;
             }
         }
     }
-
     /**
      * Whether a variable is known.
      * @param name - The string name of the variable.
      * @return Whether it corresponds to a variable in this.variables.
      */
-    hasVariable(name: string): boolean {
+    hasVariable(name) {
         let seen = false;
         for (let variable of this.variables) {
             if (variable.name == name) {
@@ -385,13 +269,12 @@ class Parser {
         }
         return seen;
     }
-
     /**
      * Whether a qubit is known.
      * @param name - The string name of the qubit.
      * @return Whether it corresponds to a qubit in this.qubits.
      */
-    hasQubit(name: string): boolean {
+    hasQubit(name) {
         let seen = false;
         for (let q of this.qubits) {
             if (q.name == name) {
@@ -401,209 +284,197 @@ class Parser {
         }
         return seen;
     }
-
     /**
      * Parses a return.
      * @param tokens - Tokens to parse.
      * @return A parsed return statement.
      */
-    return(tokens:Array<[Token, (number | String)?]>): Array<AstNode> {
+    return(tokens) {
         return [new Return(this.parseExpression(tokens.slice(1)))];
     }
-
     /**
      * Parses an fail statement.
      * @param tokens - Tokens to parse.
      * @return A parsed fail statement.
      */
-    fail(tokens:Array<[Token, (number | String)?]>): Array<AstNode> {
-        return [new Fail(new Str((tokens[1] as any)))];
+    fail(tokens) {
+        return [new Fail(new Str(tokens[1]))];
     }
-
     /**
      * Parses an operation.
      * @param tokens - Tokens to parse.
      * @return A parsed operation.
      */
-    operation(tokens:Array<[Token, (number | String)?]>): Array<AstNode> {
-        let name:string;
-        let operationTokens:Array<[Token, (number | String)?]> = [];
-        let operationParams:Array<Parameter> = [];
-        let modifierTokens: Array<Modifier> = [];
-
+    operation(tokens) {
+        let name;
+        let operationTokens = [];
+        let operationParams = [];
+        let modifierTokens = [];
         if (this.matchNext(tokens, [Token.Identifier, Token.Lbrac])) {
             name = tokens[0][1].toString();
             tokens = tokens.slice(1);
-
             let i = 0;
             while (tokens[i] != undefined && !(this.matchNext(tokens.slice(i), [Token.Rbrac]))) {
                 operationParams.push(this.parseExpression(tokens.slice(i)));
                 i++;
             }
-
             if (this.matchNext(tokens.slice(i), [Token.Unit, Token.Is])) {
                 modifierTokens = this.modifiers(tokens.slice(i + 2));
             }
-
             let j = i + 2 + modifierTokens.length;
             while (tokens[j] != undefined && !this.matchNext(tokens.slice(j), [Token.Rcurlbrac])) {
                 operationTokens.push(tokens[j]);
                 j++;
             }
             let operationParser = this.childParser(operationTokens);
-
             let operationCode = operationParser.parse();
-
             this.libraries.push(name);
             this.operationParsers[name] = operationParser;
-
             return [new Operation(name, operationCode, operationParams, modifierTokens)];
-        } else {
+        }
+        else {
             throw BadOperationNameError;
         }
     }
-
     /**
      * Parses a list of modifiers.
      * @param tokens - Modifiers to parse.
      * @return Parsed modifiers.
      */
-    modifiers(tokens:Array<[Token, (number | String)?]>): Array<Modifier> {
-        let modifiers:Array<Modifier> = [];
-
+    modifiers(tokens) {
+        let modifiers = [];
         let i = 0;
         while (tokens[i] != undefined && !(this.matchNext(tokens.slice(i), [Token.Lcurlbrac]))) {
             if (this.matchNext(tokens.slice(i), [Token.Adjoint])) {
                 modifiers.push(Modifier.Adjoint);
-            } else if (this.matchNext(tokens.slice(i), [Token.Controlled])) {
+            }
+            else if (this.matchNext(tokens.slice(i), [Token.Controlled])) {
                 modifiers.push(Modifier.Controlled);
             }
         }
-
         return modifiers;
     }
-
     /**
      * Parses a function.
      * @param tokens - Function tokens to parse.
      * @return A parsed function.
      */
-    function(tokens:Array<[Token, (number | String)?]>): Array<AstNode> {
-        let name:string;
-        let functionTokens:Array<[Token, (number | String)?]> = [];
-        let functionParams:Array<Parameter> = [];
-
+    function(tokens) {
+        let name;
+        let functionTokens = [];
+        let functionParams = [];
         if (this.matchNext(tokens, [Token.Identifier, Token.Lbrac])) {
             name = tokens[0][1].toString();
             tokens = tokens.slice(1);
-
             let i = 0;
             while (tokens[i] != undefined && !(this.matchNext(tokens.slice(i), [Token.Rbrac]))) {
                 functionParams.push(this.parseExpression(tokens.slice(1)));
                 i++;
             }
-
             let j = i;
             while (tokens[j] != undefined && !this.matchNext(tokens.slice(j), [Token.Rcurlbrac])) {
                 functionTokens.push(tokens[j]);
                 j++;
             }
             let functionParser = this.childParser(functionTokens);
-
             let functionCode = functionParser.parse();
-
             this.libraries.push(name);
             this.funcParsers[name] = functionParser;
-
             return [new Function(name, functionCode, functionParams)];
-        } else {
+        }
+        else {
             throw BadFunctionNameError;
         }
     }
-
-        /**
-     * Parses an Identifier or Ancilliary symbol.
-     * @param tokens - Symbol tokens to parse.
-     * @return A parsed symbol.
-     */
-    parseSymbol(tokens:Array<[Token, (number | String)?]>): [Qubit | Variable | GetParam, number] {
-        let name:string;
-
+    /**
+ * Parses an Identifier or Ancilliary symbol.
+ * @param tokens - Symbol tokens to parse.
+ * @return A parsed symbol.
+ */
+    parseSymbol(tokens) {
+        let name;
         if (this.matchNext(tokens, [Token.Identifier])) {
             name = tokens[0][1].toString();
         }
-
         tokens = tokens.slice(1);
-
         if (this.matchNext(tokens, [Token.Lsqbrac])) {
             tokens = tokens.slice(1);
             if (this.matchNext(tokens, [Token.Identifier])) {
                 let index = new Variable(tokens[0][1].toString());
                 if (this.hasVariable(tokens[0][1].toString())) {
                     return [new GetParam(name, index), 4];
-                } else {
+                }
+                else {
                     throw BadIndexError;
                 }
-            } else if (this.matchNext(tokens, [Token.Int])) {
-                let index = new Int(tokens[0][1] as number);
+            }
+            else if (this.matchNext(tokens, [Token.Int])) {
+                let index = new Int(tokens[0][1]);
                 tokens = tokens.slice(1);
                 if (this.matchNext(tokens, [Token.Colon, Token.Int])) {
-                    let range = new Range(index, new Int((tokens[1][1] as number)));
+                    let range = new Range(index, new Int(tokens[1][1]));
                     return [new GetParam(name, range), 6];
-                } else {
+                }
+                else {
                     return [new GetParam(name, index), 4];
                 }
-            } else {
+            }
+            else {
                 throw BadIndexError;
             }
-        } else if (this.matchNext(tokens, [Token.Period, Token.Identifier])) {
+        }
+        else if (this.matchNext(tokens, [Token.Period, Token.Identifier])) {
             if (Object.keys(this.instances).includes(name)) {
                 let inst = name;
-                return [new GetParam(inst, (this.parseSymbol(tokens.slice(1))[0] as Variable)), 3];
-            } else {
+                return [new GetParam(inst, this.parseSymbol(tokens.slice(1))[0]), 3];
+            }
+            else {
                 throw UninitializedInstanceError;
             }
-        } else if (this.hasVariable(name)) {
+        }
+        else if (this.hasVariable(name)) {
             return [new Variable(name), 1];
-        } else if (this.hasQubit(name)) {
+        }
+        else if (this.hasQubit(name)) {
             return [new Qubit(name), 1];
-        } else {
+        }
+        else {
             throw UninitializedInstanceError;
         }
     }
-
     /**
      * Parses and identifier.
      * @param tokens - Tokens to parse.
      * @return A parsed identifier.
      */
-    identifier(tokens:Array<[Token, (number | String)?]>, allowVariables): Array<AstNode> {
+    identifier(tokens, allowVariables) {
         if (!allowVariables) {
             this.symbols.push(tokens[0][1].toString());
             return this.parseSymbol(tokens);
-        } else if (allowVariables) {
+        }
+        else if (allowVariables) {
             if (this.symbols.includes(tokens[0][1].toString())) {
                 return [this.parseSymbol(tokens)[0]];
             }
         }
         throw BadIdentifierError;
     }
-
     /**
      * Parses a struct.
      * @param tokens - Tokens to parse.
      * @return A parsed struct.
      */
-    struct(tokens:Array<[Token, (number | String)?]>, name: string | null): Array<AstNode> {
-        let names: Array<Id> = [];
-        let vals: Array<AstNode> = [];
+    struct(tokens, name) {
+        let names = [];
+        let vals = [];
         let [id, consumed] = ['', 0];
         while (!(this.matchNext(tokens, [Token.Rcurlbrac]))) {
             if (this.matchNext(tokens, [Token.Identifier, Token.Colon])) {
                 if (Object.keys(this.structParsers).includes(name)) {
                     [id, consumed] = this.structParsers[name].parseSymbol(tokens);
                     tokens = tokens.slice(consumed);
-                } else {
+                }
+                else {
                     this.structParsers[name] = new StructParser(tokens);
                     [id, consumed] = this.structParsers[name].parseSymbol(tokens);
                     tokens = tokens.slice(consumed);
@@ -615,25 +486,26 @@ class Parser {
                 if (this.matchNext(tokens, [Token.Comma])) {
                     tokens = tokens.slice(1);
                 }
-            } else {
+            }
+            else {
                 throw BadStructError;
             }
         }
-        return [new Struct(vals as Array<Parameter>, names)];
+        return [new Struct(vals, names)];
     }
-
     /**
      * Parses an array.
      * @param tokens - Tokens to parse.
      * @return A parsed array.
      */
-    array(tokens:Array<[Token, (number | String)?]>): Array<AstNode> {
-        let vals: Array<Parameter> = [];
+    array(tokens) {
+        let vals = [];
         while (!(this.matchNext(tokens, [Token.Rsqbrac]))) {
             let param = this.parseNode(tokens);
             if (param instanceof Parameter) {
                 vals.push(param);
-            } else {
+            }
+            else {
                 throw BadArrayError;
             }
             while (!(this.matchNext(tokens, [Token.Comma])) && !(this.matchNext(tokens, [Token.Rsqbrac]))) {
@@ -645,13 +517,12 @@ class Parser {
         }
         return [new Arr(vals, vals.length)];
     }
-
     /**
      * Parses qubit usage.
      * @param tokens - Qubit usage tokens to parse.
      * @return A parsed qubit usage.
      */
-    use(tokens:Array<[Token, (number | String)?]>): Array<AstNode> {
+    use(tokens) {
         // use qubit = Qubit(); style
         if (this.matchNext(tokens, [Token.Identifier, Token.Eq])) {
             const id = this.identifier(tokens, true);
@@ -661,20 +532,24 @@ class Parser {
                 if (this.matchNext(tokens, [Token.QubitType, Token.Lbrac, Token.Rbrac])) {
                     this.qubits.push(qubit);
                     return [new Use(new Str(id.id), qubit)];
-                } else {
+                }
+                else {
                     throw BadUseError;
                 }
-            } else {
+            }
+            else {
                 throw BadUseError;
             }
-        // use (aux, register) = (Qubit(), Qubit[5]); style
-        } else if (this.matchNext(tokens, [Token.Lbrac])) {
-            let names: Array<Id> = [];
+            // use (aux, register) = (Qubit(), Qubit[5]); style
+        }
+        else if (this.matchNext(tokens, [Token.Lbrac])) {
+            let names = [];
             while (!(this.matchNext(tokens, [Token.Rbrac]))) {
                 let id = this.identifier(tokens, true);
                 if (id instanceof Id) {
                     names.push(id);
-                } else {
+                }
+                else {
                     throw BadUseError;
                 }
                 while (!(this.matchNext(tokens, [Token.Comma])) && !(this.matchNext(tokens, [Token.Rbrac]))) {
@@ -686,22 +561,25 @@ class Parser {
             }
             if (this.matchNext(tokens, [Token.Eq])) {
                 tokens = tokens.slice(1);
-            } else {
+            }
+            else {
                 throw BadUseError;
             }
             if (this.matchNext(tokens, [Token.Lbrac])) {
-                let vals: Array<Qubit> = [];
+                let vals = [];
                 while (!(this.matchNext(tokens, [Token.Rbrac]))) {
                     // Qubit()
                     if (this.matchNext(tokens, [Token.QubitType, Token.Lbrac, Token.Rbrac])) {
                         vals.push(new Qubit(names[vals.length].id));
-                    // Qubit[5]
-                    } else if (this.matchNext(tokens, [Token.QubitType, Token.Lsqbrac])) {
+                        // Qubit[5]
+                    }
+                    else if (this.matchNext(tokens, [Token.QubitType, Token.Lsqbrac])) {
                         let len = new Int(Number(tokens.slice(2)[1]));
                         let q = new Qubit(names[vals.length].id, len);
                         vals.push(q);
                         this.qubits.push(q);
-                    } else {
+                    }
+                    else {
                         throw BadUseError;
                     }
                     while (!(this.matchNext(tokens, [Token.Comma])) && !(this.matchNext(tokens, [Token.Rbrac]))) {
@@ -711,73 +589,59 @@ class Parser {
                         tokens = tokens.slice(1);
                     }
                 }
-                let res:Array<Use> = [];
+                let res = [];
                 for (let i = 0; i < names.length; i++) {
                     res.push(new Use(new Str(names[i].id), vals[i]));
                 }
                 return res;
-            } else {
+            }
+            else {
                 throw BadUseError;
             }
         }
     }
-
     /**
      * Parses qubit borrow.
      * @param tokens - Qubit borrow tokens to parse.
      * @return A parsed qubit borrow.
      */
-    borrow(tokens:Array<[Token, (number | String)?]>): Array<AstNode> {
+    borrow(tokens) {
         const uses = this.use(tokens);
-        return uses.map((use:Use) => {
+        return uses.map((use) => {
             return new Borrow(use.name, use.qubits);
         });
-
     }
-
     /**
      * Parses an import.
      * @param tokens - Import tokens to parse.
      * @return A parsed import.
      */
-    import(token:[Token, (number | String)?]): Array<AstNode> {
-        let name:string = token[1].toString();
-
-        if (token[0] ==  Token.Identifier) {
+    import(token) {
+        let name = token[1].toString();
+        if (token[0] == Token.Identifier) {
             this.libraries.push(name);
-
-            if (token[1] != 'Std') {
-                const q_sharp = fs.readFileSync(this.filePath + name.slice(1, name.length - 1) + '.qs', 'utf8');
-            
-                const lexer = new Lexer(q_sharp, 0);
-                const tokens = lexer.lex();
-    
-                const parser = new Parser(tokens, true, this.filePath + name.slice(1, name.length - 1).split('/').slice(0, name.slice(1, name.length - 1).split('/').length - 1).join('/'));
-                parser.symbols = this.symbols;
-                parser.instances = this.instances;
-                parser.libraries = this.libraries;
-                parser.funcParsers = this.funcParsers;
-                
-                this.funcParsers[name] = parser;
-    
-                return [new Import(name)];
-            } else {
-                return [new Import(name)];
-            }
-            // TODO: parse until semicolon
-        } else {
+            const q_sharp = fs.readFileSync(this.filePath + name.slice(1, name.length - 1) + '.qs', 'utf8');
+            const lexer = new Lexer(q_sharp, 0);
+            const tokens = lexer.lex();
+            const parser = new Parser(tokens, true, this.filePath + name.slice(1, name.length - 1).split('/').slice(0, name.slice(1, name.length - 1).split('/').length - 1).join('/'));
+            parser.symbols = this.symbols;
+            parser.instances = this.instances;
+            parser.libraries = this.libraries;
+            parser.funcParsers = this.funcParsers;
+            this.funcParsers[name] = parser;
+            return [new Import(name)];
+        }
+        else {
             throw BadImportError;
         }
     }
-
     /**
      * Parses an assertion.
      * @param tokens - Assertion tokens to parse.
      * @return A parsed assertion.
      */
-    assert(tokens:Array<[Token, (number | String)?]>): Array<AstNode> {
-        let exprTokens:Array<[Token, (number | String)?]> = [];
-
+    assert(tokens) {
+        let exprTokens = [];
         let i = 0;
         while (tokens[i] != undefined && !this.matchNext(tokens.slice(i), [Token.Newline])) {
             exprTokens.push(tokens[i]);
@@ -786,31 +650,27 @@ class Parser {
         let exp = this.parseExpression(exprTokens);
         return [new Assert(exp)];
     }
-
     /**
      * Creates a new parser and copies the current parser's context to it.
      * @param tokens - Symbol tokens for the child parser to parse.
      * @return A new parser.
      */
-    childParser(tokens:Array<[Token, (number | String)?]>): Parser {
+    childParser(tokens) {
         let newParser = new Parser(tokens, true, this.filePath);
         newParser.symbols = this.symbols;
         newParser.instances = this.instances;
         newParser.libraries = this.libraries;
         newParser.funcParsers = this.funcParsers;
-
         return newParser;
     }
-
     /**
      * Parses an assignment.
      * @param tokens - Tokens to parse.
      * @return An array of AST nodes representing the assignment.
      */
-    let(tokens:Array<[Token, (number | String)?]>): Array<AstNode> {
-        let name:string;
-        let exprTokens:Array<[Token, (number | String)?]> = [];
-
+    let(tokens) {
+        let name;
+        let exprTokens = [];
         if (this.matchNext(tokens, [Token.Let, Token.Identifier, Token.Eq])) {
             tokens = tokens.slice(1);
             name = tokens[0][1].toString();
@@ -823,20 +683,19 @@ class Parser {
             let exp = this.parseExpression(exprTokens);
             this.variables.push(new Variable(name));
             return [new Let(exp, new Variable(name))];
-        } else {
+        }
+        else {
             throw BadBindingError;
         }
     }
-
     /**
      * Parses a mutable assignment.
      * @param tokens - Tokens to parse.
      * @return An array of AST nodes representing the assignment.
      */
-    mutable(tokens:Array<[Token, (number | String)?]>): Array<AstNode> {
-        let name:string;
-        let exprTokens:Array<[Token, (number | String)?]> = [];
-
+    mutable(tokens) {
+        let name;
+        let exprTokens = [];
         if (this.matchNext(tokens, [Token.Let, Token.Identifier, Token.Eq])) {
             tokens = tokens.slice(1);
             name = tokens[0][1].toString();
@@ -849,20 +708,19 @@ class Parser {
             let exp = this.parseExpression(exprTokens);
             this.variables.push(new Variable(name));
             return [new Mutable(exp, new Variable(name))];
-        } else {
+        }
+        else {
             throw BadBindingError;
         }
     }
-
     /**
      * Parses a conditional.
      * @param tokens - Tokens to parse.
      * @return An array of AST nodes representing the conditional.
      */
-    if(tokens:Array<[Token, (number | String)?]>): Array<AstNode> {
-        let clauseTokens:Array<[Token, (number | String)?]> = [];
-        let conditionTokens:Array<[Token, (number | String)?]> = [];
-
+    if(tokens) {
+        let clauseTokens = [];
+        let conditionTokens = [];
         let i = 1;
         while (tokens[i] != undefined && !this.matchNext(tokens.slice(i), [Token.Newline])) {
             conditionTokens.push(tokens[i]);
@@ -870,18 +728,15 @@ class Parser {
         }
         const condition = this.parseExpression(conditionTokens);
         tokens = tokens.slice(conditionTokens.length + 1);
-
         let j = 1;
         while (tokens[j] != undefined && !this.matchNext(tokens.slice(j), [Token.Else]) && !this.matchNext(tokens.slice(j), [Token.Rcurlbrac])) {
             clauseTokens.push(tokens[j]);
             j++;
         }
         let ifParser = this.childParser(clauseTokens);
-
         this.clauseParsers.push(ifParser);
         const ifClause = ifParser.parse();
         tokens = tokens.slice(clauseTokens.length + 1);
-
         if (this.matchNext(tokens, [Token.Else])) {
             let k = 1;
             clauseTokens = [];
@@ -890,29 +745,29 @@ class Parser {
                 k++;
             }
             let elseParser = this.childParser(clauseTokens);
-
             this.clauseParsers.push(elseParser);
             const elseClause = elseParser.parse();
             tokens = tokens.slice(clauseTokens.length + 1);
-
             if (this.matchNext(tokens, [Token.Rcurlbrac])) {
                 return [new Condition(condition, ifClause, elseClause)];
-            } else {
+            }
+            else {
                 throw BadConditionStructureError;
             }
-        } else if (this.matchNext(tokens, [Token.Rcurlbrac])) {
+        }
+        else if (this.matchNext(tokens, [Token.Rcurlbrac])) {
             return [new Condition(condition, ifClause)];
-        } else {
+        }
+        else {
             throw BadConditionStructureError;
         }
     }
-
     /**
      * Returns the type associated with a variable.
      * @param variable - The variable.
      * @returns The variable's bound type in this scope.
      */
-    variableType(variable: Variable) {
+    variableType(variable) {
         let found = false;
         let i = 0;
         while (found === false && i < this.variables.length) {
@@ -924,35 +779,33 @@ class Parser {
         }
         if (i < this.variables.length && found === true) {
             return this.variableTypes[i];
-        } else {
+        }
+        else {
             throw UninitializedVariableError;
         }
     }
-
     /**
      * Parses a for loop using loop unrolling.
-     * 
+     *
      * @param tokens - Tokens to parse.
      * @return An array of AST nodes representing the unrolled loop.
      */
-    for(tokens:Array<[Token, (number | String)?]>): Array<AstNode> {
-        let iterName:string;
-        let iterator:For;
-        let generated:Array<AstNode> = [];
-
+    for(tokens) {
+        let iterName;
+        let iterator;
+        let generated = [];
         if (this.matchNext(tokens, [Token.Identifier, Token.Eq])) {
             iterName = tokens[0][1].toString();
             tokens = tokens.slice(2);
-
             if (this.matchNext(tokens, [Token.Int])) {
                 iterator = new For(tokens, this.matchIntList(tokens), new Variable(iterName));
-            } else if (this.matchNext(tokens, [Token.Identifier])) {
-                iterator = new For(tokens, this.matchSymbolList(tokens) as Array<Variable>, new Variable(iterName));
+            }
+            else if (this.matchNext(tokens, [Token.Identifier])) {
+                iterator = new For(tokens, this.matchSymbolList(tokens), new Variable(iterName));
             }
             while (!this.matchNext(tokens, [Token.Newline])) {
                 tokens = tokens.slice(1);
             }
-
             let k = 1;
             let clauseTokens = [];
             while (tokens[k] != undefined && !this.matchNext(tokens.slice(k), [Token.Rcurlbrac])) {
@@ -960,12 +813,10 @@ class Parser {
                 k++;
             }
             let forParser = this.childParser(clauseTokens);
-            
             let genName = iterator.variable.name;
             forParser.symbols.push(genName);
             forParser.parameters.push(genName);
             let forClause = forParser.parse();
-
             let list = [];
             let unroll = true;
             if (iterator.vals instanceof Range) {
@@ -973,16 +824,18 @@ class Parser {
                 while (it < iterator.vals.upper) {
                     list.push(it);
                 }
-            } else if (iterator.vals instanceof Array) {
+            }
+            else if (iterator.vals instanceof Array) {
                 list = iterator.vals;
-            } else if (iterator.vals instanceof Variable) {
+            }
+            else if (iterator.vals instanceof Variable) {
                 if (this.variableType(iterator.vals) == ArrayType) {
                     unroll = false;
-                } else {
+                }
+                else {
                     throw TypeError;
                 }
             }
-
             if (unroll) {
                 list.forEach((val, i) => {
                     generated.push(new Let(new Expression([val]), new Variable(genName)));
@@ -990,30 +843,29 @@ class Parser {
                         generated.push(node);
                     });
                 });
-            
-    
                 this.clauseParsers.push(forParser);
-    
                 return generated;
-            } else {
+            }
+            else {
                 return [new For(forClause, this.matchIntList(tokens), new Variable(iterName))];
             }
-        } else {
+        }
+        else {
             throw BadLoopError;
         }
     }
-
     /**
      * Parses a while loop.
-     * 
+     *
      * @param tokens - Tokens to parse.
      * @return An array of AST nodes representing the loop.
      */
-    while(tokens:Array<[Token, (number | String)?]>): Array<AstNode> {
-        let condition:Expression = null;
+    while(tokens) {
+        let condition = null;
         if (this.matchNext(tokens, [Token.Lbrac])) {
             condition = this.parseExpression(tokens.slice(1));
-        } else {
+        }
+        else {
             throw BadLoopError;
         }
         let k = 1;
@@ -1024,17 +876,15 @@ class Parser {
         }
         let whileParser = this.childParser(clauseTokens);
         let whileClause = whileParser.parse();
-
         return [new While(whileClause, condition)];
     }
-
     /**
      * Parses a repeat loop.
-     * 
+     *
      * @param tokens - Tokens to parse.
      * @return An array of AST nodes representing the repeat.
      */
-    repeat(tokens:Array<[Token, (number | String)?]>): Array<AstNode> {
+    repeat(tokens) {
         let k = 1;
         let clauseTokens = [];
         while (tokens[k] != undefined && !this.matchNext(tokens.slice(k), [Token.Rcurlbrac])) {
@@ -1043,14 +893,13 @@ class Parser {
         }
         let repeatParser = this.childParser(clauseTokens);
         let repeatClause = repeatParser.parse();
-
-        let condition:Expression = null;
+        let condition = null;
         if (this.matchNext(tokens, [Token.Until])) {
             condition = this.parseExpression(tokens.slice(1));
-        } else {
+        }
+        else {
             throw BadLoopError;
         }
-
         if (this.matchNext(tokens, [Token.Fixup])) {
             let l = 1;
             let clauseTokens = [];
@@ -1060,38 +909,36 @@ class Parser {
             }
             let fixupParser = this.childParser(clauseTokens);
             let fixupClause = fixupParser.parse();
-
             return [new Repeat(repeatClause, condition, fixupClause)];
-        } else {
+        }
+        else {
             throw BadLoopError;
         }
     }
-
     /**
      * Parses a list of integer values.
      * @param tokens - Tokens to parse.
      * @return An array of AST nodes representing the integer values.
      */
-    matchIntList(tokens:Array<[Token, (number | String)?]>): Array<Int> {
-        let args:Array<Int> = [];
-        let j:number = 0;
-
-        while(j < tokens.length && !this.matchNext(tokens.slice(j), [Token.Newline])) {
-            
+    matchIntList(tokens) {
+        let args = [];
+        let j = 0;
+        while (j < tokens.length && !this.matchNext(tokens.slice(j), [Token.Newline])) {
             if (this.matchNext(tokens.slice(j), [Token.Int])) {
                 let val = this.matchInt(tokens.slice(j));
                 args.push(val);
-            } else if (this.matchNext(tokens.slice(j), [Token.Continue, Token.Comma, Token.Int])) {
+            }
+            else if (this.matchNext(tokens.slice(j), [Token.Continue, Token.Comma, Token.Int])) {
                 let previous = args[args.length - 1].val;
                 let step = previous - args[args.length - 2].val;
                 let following = Number(tokens[j + 2][1]);
-
                 let gen = previous;
                 while (gen < following - 1) {
                     gen += step;
                     args.push(new Int(gen));
                 }
-            } else {
+            }
+            else {
                 throw BadIteratorError;
             }
             j++;
@@ -1099,66 +946,58 @@ class Parser {
                 j++;
             }
         }
-
         return args;
     }
-
     /**
      * Parses a list of symbols.
      * @param tokens - Tokens to parse.
      * @return An array of AST nodes representing the symbols.
      */
-    matchSymbolList(tokens:Array<[Token, (number | String)?]>): Array<Qubit | Variable | GetParam> {
-        let args:Array<Qubit | Variable | GetParam> = [];
-        let j:number = 0;
-
-        while(j < tokens.length && !this.matchNext(tokens.slice(j), [Token.Newline])) {
-            
+    matchSymbolList(tokens) {
+        let args = [];
+        let j = 0;
+        while (j < tokens.length && !this.matchNext(tokens.slice(j), [Token.Newline])) {
             if (this.matchNext(tokens.slice(j), [Token.Identifier])) {
                 let [val, consumed] = this.parseSymbol(tokens.slice(j));
                 args.push(val);
                 j += consumed;
-            } else {
+            }
+            else {
                 throw BadIteratorError;
             }
             if (this.matchNext(tokens.slice(j), [Token.Comma])) {
                 j++;
             }
         }
-
         return args;
     }
-
     /**
      * Parses an integer value.
      * @param tokens - Tokens to parse.
      * @return An AST node representing the value.
      */
-    matchInt(tokens:Array<[Token, (number | String)?]>): Int {
-        let val:Int;
-
+    matchInt(tokens) {
+        let val;
         if (tokens[0][0] == Token.Int) {
             val = new Int(Number(tokens[0][1]));
-        } else {
+        }
+        else {
             throw BadIntError;
         }
         return val;
     }
-
     /**
      * Checks if the next tokens match those expected.
      * @param tokens - Remaining tokens to parse.
      * @param expectedTokens - Expected tokens.
      * @return Whether there is a match.
      */
-    matchNext(tokens:Array<[Token, (number | String)?]>, expectedTokens:Array<Token>): boolean {
+    matchNext(tokens, expectedTokens) {
         let matches = true;
         let i = 0;
-
         if (tokens.length == 0) {
             return false;
         }
-
         while (i < expectedTokens.length) {
             if (tokens[i] != undefined && tokens[i][0] != expectedTokens[i]) {
                 matches = false;
@@ -1166,33 +1005,27 @@ class Parser {
             }
             i++;
         }
-        
         return matches;
     }
 }
-
 /** Class representing a struct parser. */
 class StructParser extends Parser {
-
-    parseSymbol(tokens:Array<[Token, (number | String)?]>): [Variable, number] {
-        let name:string;
-
+    parseSymbol(tokens) {
+        let name;
         if (this.matchNext(tokens, [Token.Identifier])) {
             name = tokens[0][1].toString();
         }
-
         tokens = tokens.slice(1);
-
         if (this.hasVariable(name)) {
             throw BadStructError;
-        } else {
+        }
+        else {
             const variable = new Variable(name);
             this.variables.push(variable);
             return [variable, 1];
         }
-
         // TODO: variable types
     }
 }
-
 export default Parser;
+//# sourceMappingURL=parser.js.map
