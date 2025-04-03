@@ -64,9 +64,11 @@
     }
     order = Number(components[0].indexOf('j') != -1);
     let real = parseFloat(components[order]);
-    let imaginary = parseFloat(components[Number(!order)].slice(0, components[Number(!order)].length - 1))
+    let imaginary = parseFloat(components[Number(!order)].slice(0, components[Number(!order)].length - 1));
     return new Complex(real, imaginary);
 }
+
+// TODO: complex matrices
 
 export {
     Complex,

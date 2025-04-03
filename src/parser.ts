@@ -424,7 +424,21 @@ class Parser {
      * @return A parsed gate application.
      */
     singleRotationGate(tokens:Array<[Token, (number | String)?]>, gateClass): Array<AstNode> {
-        // TODO
+        let qubit: Qubit | Variable | GetParam;
+        let rads:  Double;
+        let consumed: number;
+        if (this.matchNext(tokens, [Token.Lbrac, Token.Double])) {
+            tokens = tokens.slice(1);
+            rads = new Double(tokens[0][1] as number);
+            tokens = tokens.slice(consumed);
+            if (this.matchNext(tokens, [Token.Comma, Token.Identifier])) {
+                tokens = tokens.slice(1);
+                [qubit, consumed] = this.parseSymbol(tokens);
+            } else {
+                throw BadGateApplicationError;
+            }
+        }
+        return [new gateClass(rads, qubit)];
     }
 
     /**
@@ -432,7 +446,7 @@ class Parser {
      * @param tokens - Tokens to parse.
      * @return A parsed unitary application.
      */
-    unitary(tokens:Array<[Token, (number | String)?]): Array<AstNode> {
+    unitary(tokens:Array<[Token, (number | String)?]>): Array<AstNode> {
         // TODO
     }
 
@@ -442,7 +456,30 @@ class Parser {
      * @return A parsed gate application.
      */
     isingRotationGate(tokens:Array<[Token, (number | String)?]>, gateClass): Array<AstNode> {
-        // TODO
+        let qubit: Qubit | Variable | GetParam;
+        let rads:  Double;
+        let secondQubit:  Qubit | Variable | GetParam;
+        let consumed: number;
+        if (this.matchNext(tokens, [Token.Lbrac, Token.Double])) {
+            tokens = tokens.slice(1);
+            rads = new Double(tokens[0][1] as number);
+            tokens = tokens.slice(consumed);
+            if (this.matchNext(tokens, [Token.Comma, Token.Identifier])) {
+                tokens = tokens.slice(1);
+                [qubit, consumed] = this.parseSymbol(tokens);
+                tokens = tokens.slice(consumed);
+                if (this.matchNext(tokens, [Token.Comma, Token.Identifier])) {
+                    tokens = tokens.slice(1);
+                    [secondQubit, consumed] = this.parseSymbol(tokens);
+
+                    return [new gateClass(rads, qubit, secondQubit)];
+                } else {
+                    throw BadGateApplicationError;
+                }
+            } else {
+                throw BadGateApplicationError;
+            }
+        }
     }
 
     /**
