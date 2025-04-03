@@ -497,9 +497,9 @@ class For extends PossibleCompatibleScope {
 /** Class representing an iterator. */
 class Repeat extends PossibleCompatibleScope {
     inside:Array<AstNode>;
-    until:Condition;
+    until:Expression;
     fixup:Array<AstNode>;
-    constructor(inside:Array<AstNode>, until:Condition, fixup:Array<AstNode>) {
+    constructor(inside:Array<AstNode>, until:Expression, fixup:Array<AstNode>) {
         super();
         this.inside = inside;
         this.until = until;
@@ -510,8 +510,8 @@ class Repeat extends PossibleCompatibleScope {
 /** Class representing an iterator. */
 class While extends PossibleCompatibleScope {
     inside:Array<AstNode>;
-    until:Condition;
-    constructor(inside:Array<AstNode>, until:Condition) {
+    until:Expression;
+    constructor(inside:Array<AstNode>, until:Expression) {
         super();
         this.inside = inside;
         this.until = until;
