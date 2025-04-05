@@ -140,6 +140,7 @@ var Token;
     Token[Token["OperationType"] = 134] = "OperationType";
     Token[Token["FunctionType"] = 135] = "FunctionType";
     // end type names
+    Token[Token["Wild"] = 136] = "Wild";
 })(Token || (Token = {}));
 const paramLookupMap = {
     '^': Token.Exp,
@@ -181,7 +182,24 @@ const paramLookupMap = {
     'PauliY': Token.PauliY,
     'PauliZ': Token.PauliZ
 };
-const lookupMap = Object.assign(Object.assign({}, paramLookupMap), { '?': Token.IfTurnary, '|': Token.ElseTurnary, 'if': Token.If, 'elif': Token.Elif, 'else': Token.Else, ',': Token.Comma, ':': Token.Colon, '"': Token.Quote, '\'': Token.SingleQuote, 'w\\': Token.With, '<-': Token.Assign, '->': Token.FunctionLambda, '=>': Token.OperationLambda, 'let': Token.Let, 'mutable': Token.Mutable, 'new': Token.New, 'function': Token.Function, 'operation': Token.Operation, 'import': Token.Import, 'use': Token.Use, 'borrow': Token.Borrow, 'Adjoint': Token.Adjoint, 'Controlled': Token.Controlled, 'return': Token.Return, 'fail': Token.Fail, 'for': Token.For, 'repeat': Token.Repeat, 'until': Token.Until, 'fixup': Token.Fixup, 'while': Token.While, 'in': Token.In, 'within': Token.Within, 'apply': Token.Apply, 'is': Token.Is, 'CCNOT': Token.CCNOT, 'AND': Token.AND, 'CNOT': Token.CNOT, 'Exp': Token.Ex, 'H': Token.H, 'I': Token.I, 'M': Token.M, 'Measure': Token.Measure, 'R': Token.R, 'R1': Token.R1, 'R1Frac': Token.R1Frac, 'Reset': Token.Reset, 'ResetAll': Token.ResetAll, 'RFrac': Token.RFrac, 'Rx': Token.Rx, 'Rxx': Token.Rxx, 'Ry': Token.Ry, 'Ryy': Token.Ryy, 'Rz': Token.Rz, 'Rzz': Token.Rzz, 'S': Token.S, 'SWAP': Token.SWAP, 'T': Token.T, 'X': Token.X, 'Y': Token.Y, 'Z': Token.Z, 'ApplyUnitary': Token.ApplyUnitary, 'Message': Token.Message, '_': Token.Dummy, ';': Token.Semi, '{': Token.Lcurlbrac, '}': Token.Rcurlbrac, '//': Token.Comment, 'Unit': Token.UnitType, 'Int': Token.IntType, 'BigInt': Token.BigIntType, 'Double': Token.DoubleType, 'Bool': Token.BoolType, 'String': Token.StringType, 'Qubit': Token.QubitType, 'Result': Token.ResultType, 'Pauli': Token.PauliType, 'Range': Token.RangeType, 'Array': Token.ArrayType, 'Tuple': Token.TupleType, 'struct': Token.StructType, 'Operation': Token.OperationType, 'Function': Token.FunctionType });
+const typeLookupMap = {
+    'Unit': Token.UnitType,
+    'Int': Token.IntType,
+    'BigInt': Token.BigIntType,
+    'Double': Token.DoubleType,
+    'Bool': Token.BoolType,
+    'String': Token.StringType,
+    'Qubit': Token.QubitType,
+    'Result': Token.ResultType,
+    'Pauli': Token.PauliType,
+    'Range': Token.RangeType,
+    'Array': Token.ArrayType,
+    'Tuple': Token.TupleType,
+    'struct': Token.StructType,
+    'Operation': Token.OperationType,
+    'Function': Token.FunctionType
+};
+const lookupMap = Object.assign(Object.assign(Object.assign({}, paramLookupMap), typeLookupMap), { '?': Token.IfTurnary, '|': Token.ElseTurnary, 'if': Token.If, 'elif': Token.Elif, 'else': Token.Else, ',': Token.Comma, ':': Token.Colon, '"': Token.Quote, '\'': Token.SingleQuote, 'w\\': Token.With, '<-': Token.Assign, '->': Token.FunctionLambda, '=>': Token.OperationLambda, 'let': Token.Let, 'mutable': Token.Mutable, 'new': Token.New, 'function': Token.Function, 'operation': Token.Operation, 'import': Token.Import, 'use': Token.Use, 'borrow': Token.Borrow, 'Adjoint': Token.Adjoint, 'Controlled': Token.Controlled, 'return': Token.Return, 'fail': Token.Fail, 'for': Token.For, 'repeat': Token.Repeat, 'until': Token.Until, 'fixup': Token.Fixup, 'while': Token.While, 'in': Token.In, 'within': Token.Within, 'apply': Token.Apply, 'is': Token.Is, 'CCNOT': Token.CCNOT, 'AND': Token.AND, 'CNOT': Token.CNOT, 'Exp': Token.Ex, 'H': Token.H, 'I': Token.I, 'M': Token.M, 'Measure': Token.Measure, 'R': Token.R, 'R1': Token.R1, 'R1Frac': Token.R1Frac, 'Reset': Token.Reset, 'ResetAll': Token.ResetAll, 'RFrac': Token.RFrac, 'Rx': Token.Rx, 'Rxx': Token.Rxx, 'Ry': Token.Ry, 'Ryy': Token.Ryy, 'Rz': Token.Rz, 'Rzz': Token.Rzz, 'S': Token.S, 'SWAP': Token.SWAP, 'T': Token.T, 'X': Token.X, 'Y': Token.Y, 'Z': Token.Z, 'ApplyUnitary': Token.ApplyUnitary, 'Message': Token.Message, '_': Token.Dummy, ';': Token.Semi, '{': Token.Lcurlbrac, '}': Token.Rcurlbrac, '//': Token.Comment });
 /**
  * Returns the token that represents a given string.
  * @param ident - The string.
@@ -197,6 +215,14 @@ function lookup(ident) {
  */
 function inverseParamLookup(token) {
     return Object.keys(paramLookupMap).find((ident) => paramLookupMap[ident] == token);
+}
+/**
+ * Returns the string representation of a type token.
+ * @param tokens - The token.
+ * @return The string representation of the token.
+ */
+function inverseTypeLookup(token) {
+    return Object.keys(typeLookupMap).find((ident) => typeLookupMap[ident] == token);
 }
 /**
  * Determines whether a token denotes a parameter.
@@ -222,5 +248,5 @@ function notParam(token) {
         && token != Token.Function
         && token && token != Token.Identifier;
 }
-export { Token, notParam, lookup, inverseParamLookup };
+export { Token, notParam, lookup, inverseParamLookup, inverseTypeLookup };
 //# sourceMappingURL=token.js.map

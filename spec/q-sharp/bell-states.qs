@@ -10,29 +10,22 @@
 import Std.Diagnostics.*;
 import Std.Measurement.*;
 
-operation Main() : (Result, Result)[] {
+operation Main() : Result[] {
     // Allocate the two qubits that will be used to create a Bell state.
     use register = Qubit[2];
 
     // This array contains a label and a preparation operation for each one
     // of the four Bell states.
-    let bellStateTuples = [
-        ("|Φ+〉", PreparePhiPlus),
-        ("|Φ-〉", PreparePhiMinus),
-        ("|Ψ+〉", PreparePsiPlus),
-        ("|Ψ-〉", PreparePsiMinus)
-    ];
+    let bellStateTuples = [PreparePhiPlus, PreparePhiMinus, PreparePsiPlus, PreparePsiMinus];
 
     // Prepare all Bell states, show them using the `DumpMachine` operation
     // and measure the Bell state qubits.
-    mutable measurements = [];
-    for (label, prepare) in bellStateTuples {
+    for prepare in bellStateTuples {
         prepare(register);
-        Message($"Bell state {label}:");
         DumpMachine();
-        measurements += [(MResetZ(register[0]), MResetZ(register[1]))];
     }
-    return measurements;
+
+    return [MResetZ(register[0]), MResetZ(register[1])];
 }
 
 operation PreparePhiPlus(register : Qubit[]) : Unit {

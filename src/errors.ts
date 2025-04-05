@@ -35,11 +35,11 @@ class BadParameterError extends Error {
 }
 
 /** Class representing a bad gate applicaiton exception. */
-class BadGateApplicationError extends Error {
+class BadApplicationError extends Error {
     constructor(message?: string) {
         super(message);
         Object.setPrototypeOf(this, new.target.prototype);
-        this.name = BadGateApplicationError.name;
+        this.name = BadApplicationError.name;
     }
 }
 
@@ -308,5 +308,5 @@ export {
     UnsupportedTypeError,
     BadStructError,
     BadUseError,
-    BadGateApplicationError
+    BadApplicationError
 };

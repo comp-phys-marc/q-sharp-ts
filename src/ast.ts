@@ -49,6 +49,17 @@ class CNOT extends OpenQASMCompatible {
     }
 }
 
+/** Class representing an OpenQASM compatible CZ operation. */
+class CZ extends OpenQASMCompatible {
+    control: Qubit;
+    target: Qubit;
+    constructor(control: Qubit, target: Qubit) {
+        super();
+        this.control = control;
+        this.target = target;
+    }
+}
+
 /** Class representing an Exp operation. */
 class Ex extends AstNode {
     constructor() {
@@ -142,8 +153,10 @@ class Reset extends OpenQASMCompatible {
 
 /** Class representing an OpenQASM compatible ResetAll operation. */
 class ResetAll extends OpenQASMCompatible {
-    constructor() {
+    target: Qubit;
+    constructor(target: Qubit) {
         super();
+        this.target = target;
     }
 }
 
@@ -308,15 +321,6 @@ class Message extends AstNode {
     }
 }
 
-/** Class representing an identifier. */
-class Id extends AstNode {
-    id:string;
-    constructor(id:string) {
-        super();
-        this.id = id;
-    }
-}
-
 /** Class representing a use statement. */
 class Use extends OpenQASMCompatible {
     qubits:Qubit;
@@ -341,8 +345,8 @@ class Borrow extends AstNode {
 
 /** Class representing an import. */
 class Import extends AstNode {
-    val:string;
-    constructor(val:string) {
+    val:Variable | GetParam | Id;
+    constructor(val:Variable | GetParam | Id) {
         super();
         this.val = val;
     }
@@ -354,6 +358,15 @@ class Parameter extends AstNode {
     constructor(repr:string) {
         super();
         this.repr = repr;
+    }
+}
+
+/** Class representing an identifier. */
+class Id extends Parameter {
+    id:string;
+    constructor(id:string) {
+        super(id);
+        this.id = id;
     }
 }
 
@@ -409,12 +422,14 @@ class Struct extends Parameter {
 class Function extends PossibleCompatibleScope {
     name:string;
     nodes:Array<AstNode>;
-    params:Array<Parameter>;
-    constructor(name:string, nodes:Array<AstNode>, params:Array<Parameter>) {
+    params:Array<Array<Parameter>>;
+    returnType:AstType;
+    constructor(name:string, nodes:Array<AstNode>, params:Array<Array<Parameter>>, returnType:AstType) {
         super();
         this.name = name;
         this.nodes = nodes;
         this.params = params;
+        this.returnType = returnType;
     }
 }
 
@@ -424,18 +439,26 @@ enum Modifier {
     Controlled
 }
 
+/** Class representing a operator modifier. */
+class Adjoint extends AstNode {}
+
+/** Class representing a operator modifier. */
+class Controlled extends AstNode {}
+
 /** Class representing an operation. */
 class Operation extends PossibleCompatibleScope {
     name:string;
     nodes:Array<AstNode>;
-    params:Array<Parameter>;
+    params:Array<Array<Parameter>>;
     modifiers:Array<Modifier>;
-    constructor(name:string, nodes:Array<AstNode>, params:Array<Parameter>, modifiers:Array<Modifier>) {
+    returnType:AstType;
+    constructor(name:string, nodes:Array<AstNode>, params:Array<Array<Parameter>>, modifiers:Array<Modifier>, returnType:AstType) {
         super();
         this.name = name;
         this.nodes = nodes;
         this.params = params;
         this.modifiers = modifiers;
+        this.returnType = returnType;
     }
 }
 
@@ -482,7 +505,7 @@ class Str extends Parameter {
 }
 
 /** Class representing a comment. */
-class Comment extends AstNode {
+class Comment extends OpenQASMCompatible {
     val:string;
     constructor(val:string) {
         super();
@@ -494,12 +517,16 @@ class Comment extends AstNode {
 class For extends PossibleCompatibleScope {
     inside:Array<AstNode>;
     variable:Variable;
-    vals:Array<Int | Variable> | Range | Variable;
+    vals:Arr | Range | Variable;
     constructor(inside:Array<AstNode>, vals:Array<Int | Variable> | Range | Variable, variable:Variable) {
         super();
         this.variable = variable;
         this.inside = inside;
-        this.vals = vals;
+        if (vals instanceof Array) {
+            this.vals = new Arr(vals, vals.length);
+        } else {
+            this.vals = vals;
+        }
     }
 }
 
@@ -529,12 +556,38 @@ class While extends PossibleCompatibleScope {
 
 /** Class representing a range. */
 class Range extends Parameter {
-    lower:Int;
-    upper:Int;
-    constructor(lower:Int, upper:Int) {
-        super(`${lower}..${upper}`);
+    lower:Expression | Continue;
+    upper:Expression | Continue;
+    step:Expression;
+    constructor(lower:Expression | Continue, upper:Expression | Continue, step?:Expression) {
+        let repr = '';
+        if (step == undefined && !(lower instanceof Continue) && !(upper instanceof Continue)) {
+            repr = `${lower.repr}..${upper.repr}`;
+        } else if (step != undefined && !(lower instanceof Continue) && !(upper instanceof Continue)) {
+            repr = `${lower.repr}..${step.repr}..${upper.repr}`;
+        } else if ((lower instanceof Continue) && (step != undefined) && !(upper instanceof Continue)) {
+            repr = `...${step.repr}..${upper.repr}`;
+        } else if (!(lower instanceof Continue) && (step != undefined) && (upper instanceof Continue)) {
+            repr = `${lower.repr}..${step.repr}...`;
+        } else if ((lower instanceof Continue) && (step == undefined) && !(upper instanceof Continue)) {
+            repr = `...${upper.repr}`;
+        } else if (!(lower instanceof Continue) && (step == undefined) && (upper instanceof Continue)) {
+            repr = `${lower.repr}...`;
+        } else if ((lower instanceof Continue) && (upper instanceof Continue) && (step != undefined)) {
+            repr = `...${step.repr}...`;
+        } else if ((lower instanceof Continue) && (upper instanceof Continue) && (step == undefined)) {
+            repr = '...1...';
+        }
+        super(repr);
         this.lower = lower;
         this.upper = upper;
+    }
+}
+
+/** Class representing a continuation. */
+class Continue extends AstNode {
+    constructor() {
+        super();
     }
 }
 
@@ -559,8 +612,8 @@ class Bool extends Parameter {
 /** Class representing a qubit. */
 class Qubit extends Parameter {
     name:string;
-    length:Int;
-    constructor(name:string, length?:Int) {
+    length:Parameter;
+    constructor(name:string, length?:Parameter) {
         super(name);
         this.name = name;
         if (typeof length !== 'undefined') {
@@ -686,11 +739,11 @@ class SetParam extends AstNode {
 }
 
 /** Class representing a parameter reference. */
-class GetParam extends AstNode {
+class GetParam extends Parameter {
     instance:string;
-    index:Int | Range | Variable;
-    constructor(instance:string, index:Int | Range | Variable) {
-        super();
+    index:Expression|Range;
+    constructor(instance:string, index:Expression|Range) {
+        super(`${instance}[${index.repr}]`);
         this.instance = instance;
         this.index = index;
     }
@@ -960,6 +1013,36 @@ class Assert extends AstNode {
     }
 }
 
+/** Class representing an operator application. */
+class ApplyOperator extends Parameter {
+    name:string;
+    registers:Array<Qubit>;
+    params:Array<Array<Parameter>>;
+    // TODO: add modifiers
+    constructor(name:string, params:Array<Array<Parameter>>, registers?:Array<Qubit>) {
+        let paramRepr = '';
+        for (let p of params) {
+            for (let elem of p) {
+                paramRepr += elem.repr;
+            }
+            paramRepr += ', ';
+        }
+        if (registers != undefined) {
+            let regRepr = '';
+            for (let reg of registers) {
+                regRepr += reg.name;
+                regRepr += ',';
+            }
+            super(`${name}(${paramRepr}) ${regRepr}`);
+        } else {
+            super(`${name}(${paramRepr})`);
+        }
+        this.name = name;
+        this.registers = registers;
+        this.params = params;
+    }
+}
+
 export {
     AstNode,
     Assert,
@@ -1051,6 +1134,7 @@ export {
     X,
     Y,
     Z,
+    CZ,
     ApplyUnitary,
     Message,
     UnitType,
@@ -1071,5 +1155,9 @@ export {
     AstType,
     IndexedSet,
     GetParam,
-    Comment
+    Comment,
+    ApplyOperator,
+    Continue,
+    Adjoint,
+    Controlled
 };

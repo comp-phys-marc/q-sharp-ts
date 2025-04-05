@@ -65,5 +65,10 @@ function parseComplex(val) {
     let imaginary = parseFloat(components[Number(!order)].slice(0, components[Number(!order)].length - 1));
     return new Complex(real, imaginary);
 }
-export { Complex, parseComplex };
+class ComplexMatrix {
+    constructor(rows) {
+        this.rows = rows;
+    }
+}
+export { Complex, ComplexMatrix, parseComplex };
 //# sourceMappingURL=complex.js.map

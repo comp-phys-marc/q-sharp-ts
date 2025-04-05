@@ -30,6 +30,14 @@ class BadParameterError extends Error {
         this.name = BadParameterError.name;
     }
 }
+/** Class representing a bad gate applicaiton exception. */
+class BadApplicationError extends Error {
+    constructor(message) {
+        super(message);
+        Object.setPrototypeOf(this, new.target.prototype);
+        this.name = BadApplicationError.name;
+    }
+}
 /** Class representing a bad use exception. */
 class BadUseError extends Error {
     constructor(message) {
@@ -238,5 +246,5 @@ class UndeclaredQubitError extends Error {
         this.name = UndeclaredQubitError.name;
     }
 }
-export { BadArgumentError, BadParameterError, BadBindingError, WrongQuoteError, BadFunctionError, BadFunctionNameError, BadOperationNameError, BadConjugationError, BadIteratorError, BadIntError, BadArrayError, BadLoopError, BadConditionStructureError, BadIndexError, BadUseFunctionError, UndeclaredQubitError, UndeclaredVariableError, BadDeclarationError, BadChainError, BadPinError, BadEquivalenceError, BadImportError, BadFormatError, BadIdentifierError, UninitializedInstanceError, MixedTypesError, UninitializedVariableError, UnsupportedTypeError, BadStructError, BadUseError };
+export { BadArgumentError, BadParameterError, BadBindingError, WrongQuoteError, BadFunctionError, BadFunctionNameError, BadOperationNameError, BadConjugationError, BadIteratorError, BadIntError, BadArrayError, BadLoopError, BadConditionStructureError, BadIndexError, BadUseFunctionError, UndeclaredQubitError, UndeclaredVariableError, BadDeclarationError, BadChainError, BadPinError, BadEquivalenceError, BadImportError, BadFormatError, BadIdentifierError, UninitializedInstanceError, MixedTypesError, UninitializedVariableError, UnsupportedTypeError, BadStructError, BadUseError, BadApplicationError };
 //# sourceMappingURL=errors.js.map

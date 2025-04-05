@@ -114,6 +114,9 @@ class Lexer {
         this.readNumeric = () => {
             let num = '';
             while (isNumeric(this.peek())) {
+                if (this.peek() == '.' && this.peek(1) == '.') {
+                    break;
+                }
                 num += this.readChar();
             }
             return num;
@@ -267,6 +270,7 @@ class Lexer {
                     this.readChar();
                     return [Token.OperationLambda];
                 }
+                return [Token.Eq];
             }
             if (char == '_') {
                 return [Token.Dummy];

@@ -137,8 +137,9 @@ enum Token {
     TupleType,
     StructType,
     OperationType,
-    FunctionType
+    FunctionType,
     // end type names
+    Wild
 }
 
 const paramLookupMap:object = {
@@ -182,8 +183,27 @@ const paramLookupMap:object = {
     'PauliZ': Token.PauliZ
 }
 
+const typeLookupMap:object = {
+    'Unit': Token.UnitType,
+    'Int': Token.IntType,
+    'BigInt': Token.BigIntType,
+    'Double': Token.DoubleType,
+    'Bool': Token.BoolType,
+    'String': Token.StringType,
+    'Qubit': Token.QubitType,
+    'Result': Token.ResultType,
+    'Pauli': Token.PauliType,
+    'Range': Token.RangeType,
+    'Array': Token.ArrayType,
+    'Tuple': Token.TupleType,
+    'struct': Token.StructType,
+    'Operation': Token.OperationType,
+    'Function': Token.FunctionType
+}
+
 const lookupMap:object = {
     ...paramLookupMap,
+    ...typeLookupMap,
     '?': Token.IfTurnary,
     '|': Token.ElseTurnary,
     'if': Token.If,
@@ -251,21 +271,6 @@ const lookupMap:object = {
     '{': Token.Lcurlbrac,
     '}': Token.Rcurlbrac,
     '//': Token.Comment,
-    'Unit': Token.UnitType,
-    'Int': Token.IntType,
-    'BigInt': Token.BigIntType,
-    'Double': Token.DoubleType,
-    'Bool': Token.BoolType,
-    'String': Token.StringType,
-    'Qubit': Token.QubitType,
-    'Result': Token.ResultType,
-    'Pauli': Token.PauliType,
-    'Range': Token.RangeType,
-    'Array': Token.ArrayType,
-    'Tuple': Token.TupleType,
-    'struct': Token.StructType,
-    'Operation': Token.OperationType,
-    'Function': Token.FunctionType
 }
 
 /**
@@ -284,6 +289,15 @@ function lookup(ident:string): Token {
  */
 function inverseParamLookup(token:Token): string {
     return Object.keys(paramLookupMap).find((ident) => paramLookupMap[ident] == token);
+}
+
+/**
+ * Returns the string representation of a type token.
+ * @param tokens - The token.
+ * @return The string representation of the token.
+ */
+function inverseTypeLookup(token:Token): string {
+    return Object.keys(typeLookupMap).find((ident) => typeLookupMap[ident] == token);
 }
 
 /**
@@ -315,5 +329,6 @@ export {
     Token,
     notParam,
     lookup,
-    inverseParamLookup
+    inverseParamLookup,
+    inverseTypeLookup
 };

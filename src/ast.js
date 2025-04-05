@@ -7,11 +7,11 @@ class AstNode {
 class AstType extends AstNode {
 }
 /** Base class representing an OpenQASM compatible operation. */
-class OpenQASMCompatible extends AstNode {}
-
+class OpenQASMCompatible extends AstNode {
+}
 /** Base class representing a scope that may be composed of OpenQASM compatible operations. */
-class PossibleCompatibleScope extends AstNode {}
-
+class PossibleCompatibleScope extends AstNode {
+}
 /** Class representing an OpenQASM compatible AND operation. */
 class AND extends OpenQASMCompatible {
     constructor() {
@@ -29,6 +29,14 @@ class CCNOT extends OpenQASMCompatible {
 }
 /** Class representing an OpenQASM compatible CNOT operation. */
 class CNOT extends OpenQASMCompatible {
+    constructor(control, target) {
+        super();
+        this.control = control;
+        this.target = target;
+    }
+}
+/** Class representing an OpenQASM compatible CZ operation. */
+class CZ extends OpenQASMCompatible {
     constructor(control, target) {
         super();
         this.control = control;
@@ -105,8 +113,9 @@ class Reset extends OpenQASMCompatible {
 }
 /** Class representing an OpenQASM compatible ResetAll operation. */
 class ResetAll extends OpenQASMCompatible {
-    constructor() {
+    constructor(target) {
         super();
+        this.target = target;
     }
 }
 /** Class representing an OpenQASM compatible RFrac operation. */
@@ -227,13 +236,6 @@ class Message extends AstNode {
         super();
     }
 }
-/** Class representing an identifier. */
-class Id extends AstNode {
-    constructor(id) {
-        super();
-        this.id = id;
-    }
-}
 /** Class representing a use statement. */
 class Use extends OpenQASMCompatible {
     constructor(name, qubits) {
@@ -262,6 +264,13 @@ class Parameter extends AstNode {
     constructor(repr) {
         super();
         this.repr = repr;
+    }
+}
+/** Class representing an identifier. */
+class Id extends Parameter {
+    constructor(id) {
+        super(id);
+        this.id = id;
     }
 }
 /** Class representing an array. */
@@ -305,11 +314,12 @@ class Struct extends Parameter {
 }
 /** Class representing a function. */
 class Function extends PossibleCompatibleScope {
-    constructor(name, nodes, params) {
+    constructor(name, nodes, params, returnType) {
         super();
         this.name = name;
         this.nodes = nodes;
         this.params = params;
+        this.returnType = returnType;
     }
 }
 /** Operation modifiers. */
@@ -318,14 +328,21 @@ var Modifier;
     Modifier[Modifier["Adjoint"] = 0] = "Adjoint";
     Modifier[Modifier["Controlled"] = 1] = "Controlled";
 })(Modifier || (Modifier = {}));
+/** Class representing a operator modifier. */
+class Adjoint extends AstNode {
+}
+/** Class representing a operator modifier. */
+class Controlled extends AstNode {
+}
 /** Class representing an operation. */
 class Operation extends PossibleCompatibleScope {
-    constructor(name, nodes, params, modifiers) {
+    constructor(name, nodes, params, modifiers, returnType) {
         super();
         this.name = name;
         this.nodes = nodes;
         this.params = params;
         this.modifiers = modifiers;
+        this.returnType = returnType;
     }
 }
 /** Class representing a float. */
@@ -366,7 +383,7 @@ class Str extends Parameter {
     }
 }
 /** Class representing a comment. */
-class Comment extends AstNode {
+class Comment extends OpenQASMCompatible {
     constructor(val) {
         super();
         this.val = val;
@@ -378,7 +395,12 @@ class For extends PossibleCompatibleScope {
         super();
         this.variable = variable;
         this.inside = inside;
-        this.vals = vals;
+        if (vals instanceof Array) {
+            this.vals = new Arr(vals, vals.length);
+        }
+        else {
+            this.vals = vals;
+        }
     }
 }
 /** Class representing an iterator. */
@@ -400,10 +422,41 @@ class While extends PossibleCompatibleScope {
 }
 /** Class representing a range. */
 class Range extends Parameter {
-    constructor(lower, upper) {
-        super(`${lower}..${upper}`);
+    constructor(lower, upper, step) {
+        let repr = '';
+        if (step == undefined && !(lower instanceof Continue) && !(upper instanceof Continue)) {
+            repr = `${lower.repr}..${upper.repr}`;
+        }
+        else if (step != undefined && !(lower instanceof Continue) && !(upper instanceof Continue)) {
+            repr = `${lower.repr}..${step.repr}..${upper.repr}`;
+        }
+        else if ((lower instanceof Continue) && (step != undefined) && !(upper instanceof Continue)) {
+            repr = `...${step.repr}..${upper.repr}`;
+        }
+        else if (!(lower instanceof Continue) && (step != undefined) && (upper instanceof Continue)) {
+            repr = `${lower.repr}..${step.repr}...`;
+        }
+        else if ((lower instanceof Continue) && (step == undefined) && !(upper instanceof Continue)) {
+            repr = `...${upper.repr}`;
+        }
+        else if (!(lower instanceof Continue) && (step == undefined) && (upper instanceof Continue)) {
+            repr = `${lower.repr}...`;
+        }
+        else if ((lower instanceof Continue) && (upper instanceof Continue) && (step != undefined)) {
+            repr = `...${step.repr}...`;
+        }
+        else if ((lower instanceof Continue) && (upper instanceof Continue) && (step == undefined)) {
+            repr = '...1...';
+        }
+        super(repr);
         this.lower = lower;
         this.upper = upper;
+    }
+}
+/** Class representing a continuation. */
+class Continue extends AstNode {
+    constructor() {
+        super();
     }
 }
 /** Class representing an integer. */
@@ -539,9 +592,9 @@ class SetParam extends AstNode {
     }
 }
 /** Class representing a parameter reference. */
-class GetParam extends AstNode {
+class GetParam extends Parameter {
     constructor(instance, index) {
-        super();
+        super(`${instance}[${index.repr}]`);
         this.instance = instance;
         this.index = index;
     }
@@ -764,5 +817,32 @@ class Assert extends AstNode {
         this.expression = expression;
     }
 }
-export { AstNode, Assert, Id, Arr, Int, Bool, Mod, Parameter, Condition, Minus, Plus, Times, Divide, Exp, Str, Geq, Leq, Neq, Expression, Qubit, Or, Less, More, And, Not, Left, Right, Variable, Let, SetParam, Range, Struct, Operation, Function, BigInt, Result, Double, Unit, Pauli, Eq, Peq, Meq, Dummy, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor, Use, Borrow, Import, Mutable, Unwrap, For, While, Repeat, Fail, Return, Conjugation, Paulis, Tuple, Modifier, Is, OpenQASMCompatible, PossibleCompatibleScope, AND, CCNOT, CNOT, Ex, H, I, M, Measure, R, R1, R1Frac, Reset, ResetAll, RFrac, Rx, Rxx, Ry, Ryy, Rz, Rzz, S, SWAP, T, X, Y, Z, ApplyUnitary, Message, UnitType, IntType, BigIntType, DoubleType, BoolType, StringType, QubitType, ResultType, PauliType, RangeType, ArrayType, TupleType, StructType, OperationType, FunctionType, AstType, IndexedSet, GetParam, Comment };
+/** Class representing an operator application. */
+class ApplyOperator extends Parameter {
+    // TODO: add modifiers
+    constructor(name, params, registers) {
+        let paramRepr = '';
+        for (let p of params) {
+            for (let elem of p) {
+                paramRepr += elem.repr;
+            }
+            paramRepr += ', ';
+        }
+        if (registers != undefined) {
+            let regRepr = '';
+            for (let reg of registers) {
+                regRepr += reg.name;
+                regRepr += ',';
+            }
+            super(`${name}(${paramRepr}) ${regRepr}`);
+        }
+        else {
+            super(`${name}(${paramRepr})`);
+        }
+        this.name = name;
+        this.registers = registers;
+        this.params = params;
+    }
+}
+export { AstNode, Assert, Id, Arr, Int, Bool, Mod, Parameter, Condition, Minus, Plus, Times, Divide, Exp, Str, Geq, Leq, Neq, Expression, Qubit, Or, Less, More, And, Not, Left, Right, Variable, Let, SetParam, Range, Struct, Operation, Function, BigInt, Result, Double, Unit, Pauli, Eq, Peq, Meq, Dummy, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor, Use, Borrow, Import, Mutable, Unwrap, For, While, Repeat, Fail, Return, Conjugation, Paulis, Tuple, Modifier, Is, OpenQASMCompatible, PossibleCompatibleScope, AND, CCNOT, CNOT, Ex, H, I, M, Measure, R, R1, R1Frac, Reset, ResetAll, RFrac, Rx, Rxx, Ry, Ryy, Rz, Rzz, S, SWAP, T, X, Y, Z, CZ, ApplyUnitary, Message, UnitType, IntType, BigIntType, DoubleType, BoolType, StringType, QubitType, ResultType, PauliType, RangeType, ArrayType, TupleType, StructType, OperationType, FunctionType, AstType, IndexedSet, GetParam, Comment, ApplyOperator, Continue, Adjoint, Controlled };
 //# sourceMappingURL=ast.js.map
