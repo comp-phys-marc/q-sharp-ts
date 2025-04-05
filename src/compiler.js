@@ -1,5 +1,5 @@
 import { Paulis, OpenQASMCompatible, PossibleCompatibleScope, Function, Operation, Repeat, While, For, Condition, Conjugation, CCNOT, CNOT, H, I, M, Measure, R, R1, R1Frac, Reset, ResetAll, RFrac, Rx, Rxx, Ry, Ryy, Rz, Rzz, S, SWAP, T, X, Y, Z, Variable, Arr, Tuple, Range, IntType, BigIntType, DoubleType, BoolType, QubitType, Use, Int, Comment, CZ } from './ast.js';
-import { BadArgumentError, MixedTypesError, UnsupportedTypeError, UninitializedVariableError, BadIteratorError } from './errors.js';
+import { BadArgumentError, UninitializedVariableError, BadIteratorError } from './errors.js';
 /**
  *  Class representing a compiler that compiles any fully OpenQASM compatible scopes in the given program into OpenQASM.
  *  TODO: increase the number of transforms that are implemented from Q# to OpenQASM syntax!
@@ -46,8 +46,10 @@ class Compiler {
                                         scopeQasm += `${elem.repr}`;
                                     }
                                 }
+                                if (node.params.length > 1) {
+                                    scopeQasm += ',';
+                                }
                             }
-                            scopeQasm += ',';
                             scopeQasm += `) {\n`;
                             scopeQasm += compiledFunction;
                             scopeQasm += `\n}\n`;
@@ -114,35 +116,17 @@ class Compiler {
                             else if (ty == QubitType) {
                                 scopeQasm += 'qubit ';
                             }
-                            else {
-                                throw UnsupportedTypeError; // TODO: support more types for iterators
-                            }
                         }
                         if (node.vals instanceof Arr) {
                             // check the type is consistent
                             let ty = node.vals.vals[0].constructor.name;
                             let max = 0;
-                            if (node.vals[0] instanceof Variable) {
-                                let index = this.variables.indexOf(node.vals[0].name);
-                                ty = this.variableTypes[index].constructor.name;
-                            }
-                            else if (node.vals[0] instanceof Int) {
+                            if (node.vals.vals[0] instanceof Int) {
                                 max = node.vals[0].val;
                             }
                             for (let e = 1; e < node.vals.size; e++) {
                                 if (node.vals.vals[e].constructor.name == 'Int' && node.vals.vals[e].val > max) {
                                     max = node.vals.vals[e].val;
-                                }
-                                if (node.vals.vals[e].constructor.name != ty) {
-                                    if (node.vals.vals[e] instanceof Variable) {
-                                        let index = this.variables.indexOf(node.vals.vals[e]);
-                                        if (this.variableTypes[index].constructor.name != ty) {
-                                            throw MixedTypesError;
-                                        }
-                                    }
-                                    else {
-                                        throw MixedTypesError;
-                                    }
                                 }
                             }
                             if (ty == 'Int' || ty == 'BigInt') {
@@ -170,9 +154,6 @@ class Compiler {
                             }
                             else if (ty == 'Qubit') {
                                 scopeQasm += 'qubit ';
-                            }
-                            else {
-                                throw UnsupportedTypeError; // TODO: support more types for iterators
                             }
                         }
                         else if (node.vals instanceof Range) {
@@ -245,7 +226,7 @@ class Compiler {
                         node.qasmString = `ccx ${node.first_control.repr} ${node.second_control.repr} ${node.target.repr};\n`;
                     }
                     else if (node instanceof Comment) {
-                        node.qasmString = `// ${node.val};\n`;
+                        node.qasmString = `// ${node.val}\n`;
                     }
                     else if (node instanceof CNOT) {
                         node.qasmString = `cx ${node.control.repr} ${node.target.repr};\n`;

@@ -5,9 +5,9 @@ import * as fs from 'fs';
 // Replace me!
 const baseDir = '/Users/marcusedwards/Documents/School/Courses/CMPT_981/final-project/code';
 // Try a few scripts!
-const q_sharp = fs.readFileSync(baseDir + '/spec/q-sharp/demo.qs', 'utf8'); // Fully parses and compiles...
-// const q_sharp = fs.readFileSync(baseDir + 'spec/q-sharp/bell-states.qs', 'utf8');  // Fully parses and partially compiles...
-// const q_sharp = fs.readFileSync(baseDir + 'spec/q-sharp/grover.qs', 'utf8');  // Fully parses but does not compile...
+// const q_sharp = fs.readFileSync(baseDir + '/spec/q-sharp/demo.qs', 'utf8');  // Fully parses and compiles...
+// const q_sharp = fs.readFileSync(baseDir + '/spec/q-sharp/bell-states.qs', 'utf8');  // Fully parses and partially compiles...
+const q_sharp = fs.readFileSync(baseDir + '/spec/q-sharp/grover.qs', 'utf8'); // Fully parses and partially compiles...
 console.log(q_sharp);
 const lexer = new Lexer(q_sharp, 0);
 const tokens = lexer.lex();
@@ -33,5 +33,7 @@ if (!compatible) {
 }
 console.log(qasm);
 // Output the compiled QASM!
-fs.writeFile(baseDir + '/spec/qasm/demo.qasm', qasm, () => { });
+// fs.writeFile(baseDir + '/spec/qasm/demo.qasm', qasm, () => {});
+// fs.writeFile(baseDir + '/spec/qasm/bell-states.qasm', qasm, () => {});
+fs.writeFile(baseDir + '/spec/qasm/grover.qasm', qasm, () => { });
 //# sourceMappingURL=example.js.map
