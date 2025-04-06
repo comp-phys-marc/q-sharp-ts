@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import Lexer from './lexer.js';
 import { inverseTypeLookup, notParam, Token } from './token.js';
-import { Assert, Id, Arr, Int, Bool, Mod, Parameter, Condition, Minus, Plus, Times, Divide, Exp, Str, Geq, Leq, Neq, Expression, Qubit, Or, Less, More, And, Not, Left, Right, Variable, Let, Range, Struct, Operation, Function, BigInt, Result, Double, Pauli, Eq, Peq, Meq, Dummy, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor, Use, Borrow, Import, Mutable, Unwrap, For, While, Repeat, Fail, Return, Conjugation, Paulis, Modifier, GetParam, ArrayType, Comment, CCNOT, CNOT, Ex, H, I, M, R1, R1Frac, Reset, ResetAll, RFrac, Rx, Rxx, Ry, Ryy, Rz, Rzz, S, SWAP, T, X, Y, Z, UnitType, BigIntType, IntType, DoubleType, BoolType, StringType, QubitType, ResultType, PauliType, RangeType, TupleType, OperationType, FunctionType, ApplyOperator, Continue, CZ, Adjoint, Controlled, } from './ast.js';
+import { Id, Arr, Int, Bool, Mod, Parameter, Condition, Minus, Plus, Times, Divide, Exp, Str, Geq, Leq, Neq, Expression, Qubit, Or, Less, More, And, Not, Left, Right, Variable, Let, Range, Struct, Operation, Function, BigInt, Result, Double, Pauli, Eq, Peq, Meq, Dummy, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor, Use, Borrow, Import, Mutable, Unwrap, For, While, Repeat, Fail, Return, Conjugation, Paulis, Modifier, GetParam, ArrayType, Comment, CCNOT, CNOT, Ex, H, I, M, R1, R1Frac, Reset, ResetAll, RFrac, Rx, Rxx, Ry, Ryy, Rz, Rzz, S, SWAP, T, X, Y, Z, UnitType, BigIntType, IntType, DoubleType, BoolType, StringType, QubitType, ResultType, PauliType, RangeType, TupleType, OperationType, FunctionType, ApplyOperator, Continue, CZ, Adjoint, Controlled, } from './ast.js';
 import { BadImportError, BadFunctionNameError, BadConjugationError, BadOperationNameError, BadIntError, BadIteratorError, BadLoopError, BadConditionStructureError, BadBindingError, BadIdentifierError, BadStructError, BadIndexError, BadUseError, UninitializedVariableError, BadApplicationError, BadParameterError, BadArgumentError } from './errors.js';
 import { ComplexMatrix, parseComplex } from './complex.js';
 /** Class representing a token parser. */
@@ -1118,21 +1118,6 @@ class Parser {
         else {
             throw BadImportError;
         }
-    }
-    /**
-     * Parses an assertion.
-     * @param tokens - Assertion tokens to parse.
-     * @return A parsed assertion.
-     */
-    assert(tokens) {
-        let exprTokens = [];
-        let i = 0;
-        while (tokens[i] != undefined && !this.matchNext(tokens.slice(i), [Token.Newline])) {
-            exprTokens.push(tokens[i]);
-            i++;
-        }
-        let exp = this.parseExpression(exprTokens)[0];
-        return [new Assert(exp)];
     }
     /**
      * Creates a new parser and copies the current parser's context to it.

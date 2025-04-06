@@ -810,13 +810,6 @@ class Return extends AstNode {
         this.expr = expr;
     }
 }
-/** Class representing assertion. */
-class Assert extends AstNode {
-    constructor(expression) {
-        super();
-        this.expression = expression;
-    }
-}
 /** Class representing an operator application. */
 class ApplyOperator extends Parameter {
     // TODO: add modifiers
@@ -844,5 +837,5 @@ class ApplyOperator extends Parameter {
         this.params = params;
     }
 }
-export { AstNode, Assert, Id, Arr, Int, Bool, Mod, Parameter, Condition, Minus, Plus, Times, Divide, Exp, Str, Geq, Leq, Neq, Expression, Qubit, Or, Less, More, And, Not, Left, Right, Variable, Let, SetParam, Range, Struct, Operation, Function, BigInt, Result, Double, Unit, Pauli, Eq, Peq, Meq, Dummy, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor, Use, Borrow, Import, Mutable, Unwrap, For, While, Repeat, Fail, Return, Conjugation, Paulis, Tuple, Modifier, Is, OpenQASMCompatible, PossibleCompatibleScope, AND, CCNOT, CNOT, Ex, H, I, M, Measure, R, R1, R1Frac, Reset, ResetAll, RFrac, Rx, Rxx, Ry, Ryy, Rz, Rzz, S, SWAP, T, X, Y, Z, CZ, ApplyUnitary, Message, UnitType, IntType, BigIntType, DoubleType, BoolType, StringType, QubitType, ResultType, PauliType, RangeType, ArrayType, TupleType, StructType, OperationType, FunctionType, AstType, IndexedSet, GetParam, Comment, ApplyOperator, Continue, Adjoint, Controlled };
+export { AstNode, Id, Arr, Int, Bool, Mod, Parameter, Condition, Minus, Plus, Times, Divide, Exp, Str, Geq, Leq, Neq, Expression, Qubit, Or, Less, More, And, Not, Left, Right, Variable, Let, SetParam, Range, Struct, Operation, Function, BigInt, Result, Double, Unit, Pauli, Eq, Peq, Meq, Dummy, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor, Use, Borrow, Import, Mutable, Unwrap, For, While, Repeat, Fail, Return, Conjugation, Paulis, Tuple, Modifier, Is, OpenQASMCompatible, PossibleCompatibleScope, AND, CCNOT, CNOT, Ex, H, I, M, Measure, R, R1, R1Frac, Reset, ResetAll, RFrac, Rx, Rxx, Ry, Ryy, Rz, Rzz, S, SWAP, T, X, Y, Z, CZ, ApplyUnitary, Message, UnitType, IntType, BigIntType, DoubleType, BoolType, StringType, QubitType, ResultType, PauliType, RangeType, ArrayType, TupleType, StructType, OperationType, FunctionType, AstType, IndexedSet, GetParam, Comment, ApplyOperator, Continue, Adjoint, Controlled };
 //# sourceMappingURL=ast.js.map

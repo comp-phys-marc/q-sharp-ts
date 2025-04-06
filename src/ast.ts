@@ -1004,15 +1004,6 @@ class Return extends AstNode {
     }
 }
 
-/** Class representing assertion. */
-class Assert extends AstNode {
-    expression:Expression;
-    constructor(expression:Expression) {
-        super();
-        this.expression = expression;
-    }
-}
-
 /** Class representing an operator application. */
 class ApplyOperator extends Parameter {
     name:string;
@@ -1045,7 +1036,6 @@ class ApplyOperator extends Parameter {
 
 export {
     AstNode,
-    Assert,
     Id,
     Arr,
     Int,

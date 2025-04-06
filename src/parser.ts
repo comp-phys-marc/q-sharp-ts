@@ -7,7 +7,6 @@ import {
 } from './token.js';
 import { 
     AstNode,
-    Assert,
     Id,
     Arr,
     Int,
@@ -131,9 +130,7 @@ import {
     BadBindingError,
     BadIdentifierError,
     BadStructError,
-    UninitializedInstanceError,
     BadIndexError,
-    BadArrayError,
     BadUseError,
     UninitializedVariableError,
     BadApplicationError,
@@ -1293,23 +1290,6 @@ class Parser {
         } else {
             throw BadImportError;
         }
-    }
-
-    /**
-     * Parses an assertion.
-     * @param tokens - Assertion tokens to parse.
-     * @return A parsed assertion.
-     */
-    assert(tokens:Array<[Token, (number | String)?]>): Array<AstNode> {
-        let exprTokens:Array<[Token, (number | String)?]> = [];
-
-        let i = 0;
-        while (tokens[i] != undefined && !this.matchNext(tokens.slice(i), [Token.Newline])) {
-            exprTokens.push(tokens[i]);
-            i++;
-        }
-        let exp = this.parseExpression(exprTokens)[0];
-        return [new Assert(exp)];
     }
 
     /**
