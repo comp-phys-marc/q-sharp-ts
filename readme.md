@@ -572,7 +572,7 @@ The Q\# `Measure` operator accepts a basis whereas the QASM version of this oper
 Therefore, additional operators need to be inserted to transform the subit into the appropriate basis before measuring in 
 a QASM program. This is one more example of how Q\# remains higher level in many regards than QASM 3.0, even considering some
 gate libraries that extend the QASM standrard library such as `qelib1.inc' which still does not contain all the gates in Q\#'s 
-intrinsic library. This makes us confident that our technology can be considered a compiler (which \textit{lowers} Q\# to QASM) rather 
+intrinsic library. This makes us confident that our technology can be considered a compiler (which lowers Q\# to QASM) rather 
 than a transpiler (which would translate between two languages that are siblings in the abstraction hierarchy of the quantum programming stack).
 
 The compile toolchain presented can be compared against the one maintained by Microsoft [SGT+18]. For example, the compilation of the Grover.qs program 
