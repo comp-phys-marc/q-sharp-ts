@@ -1,7 +1,7 @@
 {
     "name": "q-sharp-ts",
     "version": "0.1.0",
-    "description": "A parser for a subset of Q# language features, implemented in TypeScript.",
+    "description": "A parser for Q# language features, implemented in TypeScript.",
     "main": "dist/main.js",
     "scripts": {
         "test": "ts-node node_modules/jasmine/bin/jasmine"
