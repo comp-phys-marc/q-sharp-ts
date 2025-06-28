@@ -436,6 +436,8 @@ It also involves in some cases translating intrinsic Q\# instructions, which are
 instruction set provided by QASM 3.0. An example of this is given by the translation of two-qubit Ising XX, YY and ZZ rotations, 
 which are intrinsic operators in Q\#, to collections of quantum instructions in QASM.
 
+**Note: the compiler implementation has been moved to its own branch.**
+
 ### Input Q\#:
 
 ```
