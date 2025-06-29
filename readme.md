@@ -4,6 +4,8 @@ Q#, the high-level quantum programming language for quantum circuit specificatio
 
 Language documentation is provided by MicroSoft [here](https://learn.microsoft.com/en-us/azure/quantum/qsharp-overview).
 
+**NOTE: this version 0 package is experimental!**
+
 # Usage
 
 Import the parse function or parseString function from the package.
