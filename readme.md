@@ -459,7 +459,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 
 Feel free to clone, fork, comment or contribute on [GitHub](https://github.com/comp-phys-marc/q-sharp-ts)!
 
-## How to Cite
+<!-- ## How to Cite
 
 If you are using Q-SHARP-TS for research we appreciate any citations. Please read and cite our pre-print.
 
@@ -471,4 +471,4 @@ If you are using Q-SHARP-TS for research we appreciate any citations. Please rea
       archivePrefix={arXiv},
       primaryClass={cs.PL},
 }
-```
+``` -->
