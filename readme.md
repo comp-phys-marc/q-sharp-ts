@@ -1,5 +1,7 @@
 # Q Sharp TS
 
+![NPM Downloads](https://img.shields.io/npm/dy/q-sharp-ts)
+
 Q#, the high-level quantum programming language for quantum circuit specification, implemented in TypeScript.
 
 Language documentation is provided by MicroSoft [here](https://learn.microsoft.com/en-us/azure/quantum/qsharp-overview).
