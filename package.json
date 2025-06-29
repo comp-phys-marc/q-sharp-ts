@@ -1,6 +1,6 @@
 {
     "name": "q-sharp-ts",
-    "version": "0.1.2",
+    "version": "0.1.3",
     "description": "A parser for Q# language features, implemented in TypeScript.",
     "main": "dist/main.js",
     "scripts": {
