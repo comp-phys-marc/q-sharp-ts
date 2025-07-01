@@ -461,16 +461,18 @@ Unless required by applicable law or agreed to in writing, software distributed 
 
 Feel free to clone, fork, comment or contribute on [GitHub](https://github.com/comp-phys-marc/q-sharp-ts)!
 
-<!-- ## How to Cite
+## How to Cite
 
 If you are using Q-SHARP-TS for research we appreciate any citations. Please read and cite our pre-print.
 
 ```
-@misc{edwards2025,
+@misc{edwards2025compilingqsubsetqasm,
       title={Compiling a Q# Subset to QASM 3.0 in TypeScript via a JSON Based IR}, 
       author={Marcus Edwards},
       year={2025},
+      eprint={2506.23407},
       archivePrefix={arXiv},
       primaryClass={cs.PL},
+      url={https://arxiv.org/abs/2506.23407}, 
 }
-``` -->
+```
