@@ -17,16 +17,16 @@ Language documentation is provided by MicroSoft [here](https://learn.microsoft.c
 Import the parse function or parseString function from the package.
 
 ```ts
-import { parseFile, parseString } from 'q-sharp-ts';
+import { parse, parseString } from 'q-sharp-ts';
 ```
 
-`parseFile` can be called with a file path to a `.qs` file. It will parse the file and return the abstract syntax tree representation.
+`parse` can be called with a file path to a `.qs` file. It will parse the file and return the abstract syntax tree representation.
 
 ```ts
-let ast = parseFile("<file-path>");
+let ast = parse("<file-path>");
 ```
 
-`parseString` should be called with a string of Q# code. It will parse the code and return the abstract syntax tree representation. `parseString` also takes the same optional arguments as `parseFile`.
+`parseString` should be called with a string of Q# code. It will parse the code and return the abstract syntax tree representation. `parseString` also takes the same optional arguments as `parse`.
 
 ```ts
 let ast = parseString("<qs-string>");
