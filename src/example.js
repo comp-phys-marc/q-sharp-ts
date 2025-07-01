@@ -1,6 +1,5 @@
 import Lexer from './lexer.js';
 import Parser from './parser.js';
-import Compiler from './compiler.js';
 import * as fs from 'fs';
 let total = 0;
 // Replace me!
@@ -35,19 +34,5 @@ for (let i = 0; i < ast.length; i++) {
     console.log(JSON.stringify(ast[i]));
     console.log('\n');
 }
-startTime = performance.now();
-const compiler = new Compiler(ast, '../spec/q-sharp/', parser.qubits, parser.variables, parser.variableTypes);
-const [qasm, compatible, qasmAst] = compiler.compile();
-endTime = performance.now();
-total += endTime - startTime;
-console.log(`Compiling took ${endTime - startTime} milliseconds.`);
-if (!compatible) {
-    console.log('WARNING! The Q# code is not fully supported by the compiler. All compatible scopes have been compiled.');
-}
-console.log(qasm);
-// Output the compiled QASM!
-// fs.writeFile(baseDir + '/spec/qasm/demo.qasm', qasm, () => {});
-// fs.writeFile(baseDir + '/spec/qasm/bell-states.qasm', qasm, () => {});
-fs.writeFile(baseDir + '/spec/qasm/grover.qasm', qasm, () => { });
 console.log(`Total time: ${total} milliseconds.`);
 //# sourceMappingURL=example.js.map

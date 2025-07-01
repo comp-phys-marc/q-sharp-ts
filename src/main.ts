@@ -25,3 +25,22 @@ exports.parse = function(file:string) {
 }
 
 exports.parseString = parseString;
+
+parseString(`
+operation ReflectAboutMarked(inputQubits : Qubit[]) : Unit {
+  use outputQubit = Qubit();
+  within {
+    // We initialize the outputQubit to (|0> = |1>) / sqrt(2), so that
+    // toggling it results in a (=1) phase.
+    X(outputQubit);
+    H(outputQubit);
+    // Flip the outputQubit for marked states.
+    // Here, we get the state with alternating 0s and 1s by using the X
+    // operation on every other qubit.
+    for q in inputQubits [...2...] {
+      X(q);
+    }
+  } apply {
+    Controlled X(inputQubits, outputQubit);
+  }
+}`);
