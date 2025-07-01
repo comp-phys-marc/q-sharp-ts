@@ -5,7 +5,7 @@ import * as fs from 'fs';
 let total = 0;
 
 // Replace me!
-const baseDir = '/Users/marcusedwards/Documents/School/Courses/CMPT_981/final-project/code';
+const baseDir = '..';
 
 // Try a few scripts!
 // const q_sharp = fs.readFileSync(baseDir + '/spec/q-sharp/demo.qs', 'utf8');  // Fully parses and compiles...
