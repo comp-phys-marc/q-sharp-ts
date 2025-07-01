@@ -276,11 +276,17 @@ class Id extends Parameter {
 /** Class representing an array. */
 class Arr extends Parameter {
     constructor(vals, size) {
-        let repr = '[';
+        const isRange = (!((vals.length == 1) && ((vals[0] instanceof GetParam) || (vals[0] instanceof IndexedSet))));
+        let repr = '';
+        if (isRange) {
+            repr = '[';
+        }
         for (let param of vals) {
             repr += `${param.repr},`;
         }
-        repr += ']';
+        if (isRange) {
+            repr += ']';
+        }
         super(repr);
         this.vals = vals;
         this.size = size;

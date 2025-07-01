@@ -8,6 +8,10 @@ Language documentation is provided by MicroSoft [here](https://learn.microsoft.c
 
 **NOTE: this version 0 package is experimental!**
 
+# New in Version 0.1.5
+
+- Fixed range type array representation bug.
+
 # Usage
 
 Import the parse function or parseString function from the package.
@@ -445,6 +449,10 @@ tsc src/*.ts --outDir dist
 npm install
 ```
 
+## Source code
+
+Feel free to clone, fork, comment or contribute on [GitHub](https://github.com/comp-phys-marc/q-sharp-ts)!
+
 ## License
 
 Copyright 2025 Marcus Edwards
@@ -456,10 +464,6 @@ http://www.apache.org/licenses/LICENSE-2.0
 ```
 
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
-
-## Source code
-
-Feel free to clone, fork, comment or contribute on [GitHub](https://github.com/comp-phys-marc/q-sharp-ts)!
 
 ## How to Cite
 
