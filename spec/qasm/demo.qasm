@@ -43,7 +43,7 @@ u1(-1.5) register[1];
 cx register[0],register[1];
 h register[1];
 u2(-pi, pi-1.5) register[0];
-//  Ising YY
+//  Ising XX
 u3(pi/2, 2.3, 0) register[0];
 h register[1];
 cx register[0],register[1];
