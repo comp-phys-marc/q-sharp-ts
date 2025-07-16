@@ -42,7 +42,7 @@ operation Main(): Unit {
     // Ising XX 
     Rxx(1.5, register[0], register[1]);
 
-    // Ising YY
+    // Ising XX
     Rxx(2.3, register[0], register[1]);
 
     // Ising ZZ
