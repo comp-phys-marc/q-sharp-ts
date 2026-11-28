@@ -3,7 +3,7 @@ import Lexer from "../src/lexer";
 import Parser from "../src/parser";
 import {
     AstNode, Bool, CNOT, Double, Expression, H, Int, Let, Qubit,
-    Return, Str, Use, Variable
+    Return, Str, Use, Variable, Plus, Minus, Times, Divide, Eq, Less, And
 } from "../src/ast";
 import { BadApplicationError, BadBindingError, BadIdentifierError, BadUseError } from "../src/errors";
 
@@ -91,5 +91,49 @@ describe("parser", () => {
 
     it("rejects a gate without a parenthesized argument", () => {
         expect(() => parse("H q;\n")).toThrow(BadApplicationError);
+    });
+
+    [
+        {source: "2 + 3", operator: new Plus()},
+        {source: "8 - 3", operator: new Minus()},
+        {source: "2 * 3", operator: new Times()},
+        {source: "8 / 2", operator: new Divide()},
+        {source: "2 == 3", operator: new Eq()},
+        {source: "2 < 3", operator: new Less()}
+    ].forEach(({source, operator}) => {
+        it(`preserves the operator and operands in ${source}`, () => {
+            const operands = source.split(" ");
+            expect(parse(`return ${source};\n`)).toEqual([
+                new Return(new Expression([
+                    new Int(Number(operands[0])), operator, new Int(Number(operands[2]))
+                ]))
+            ]);
+        });
+    });
+
+    it("preserves both operands of a boolean conjunction", () => {
+        expect(parse("return true and false;\n")).toEqual([
+            new Return(new Expression([new Bool(true), new And(), new Bool(false)]))
+        ]);
+    });
+
+    it("rejects an unknown name in a return expression", () => {
+        expect(() => parse("return missing;\n")).toThrow(BadIdentifierError);
+    });
+
+    it("rejects a binding without a variable name", () => {
+        expect(() => parse("let = 1;\n")).toThrow(BadBindingError);
+    });
+
+    it("rejects allocation from a non-Qubit constructor", () => {
+        expect(() => parse("use q = Int();\n")).toThrow(BadUseError);
+    });
+
+    it("rejects a single-qubit gate with no argument", () => {
+        expect(() => parse("H();\n")).toThrow(BadApplicationError);
+    });
+
+    it("rejects CNOT without a second qubit", () => {
+        expect(() => parse("use q = Qubit();\nCNOT(q);\n")).toThrow(BadApplicationError);
     });
 });
